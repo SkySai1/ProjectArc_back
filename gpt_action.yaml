@@ -1,0 +1,409 @@
+openapi: 3.1.0
+info:
+  title: Project Management API
+  description: API для управления проектами, включая создание файлов, удаление и получение карты проекта.
+  version: 1.0.0
+servers:
+  - url: https://gpts.volutega.com/
+    description: Основной сервер API
+paths:
+  /create:
+    post:
+      operationId: createFile
+      summary: Создание нового файла.
+      description: Создает новый файл или папки с указанным содержимым. После создания обновляет карту проекта.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                  description: Имя файла или путь, включая папки.
+                  example: gpt_folder/example.py
+                content:
+                  type: string
+                  description: Содержимое файла.
+                  example: print('Hello, World!')
+                description:
+                  type: string
+                  description: Описание файла.
+                  example: This is an example Python file.
+              required:
+                - filename
+      responses:
+        "201":
+          description: Файл успешно создан.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Сообщение об успешном создании файла.
+        "400":
+          description: Ошибка валидации или файл уже существует.
+        "401":
+          description: Ошибка авторизации.
+      security:
+        - apiKeyAuth: []
+  /delete:
+    get:
+      operationId: deleteFileOrFolder
+      summary: Delete a file or folder
+      description: Deletes the specified file or folder. Deletes recursively if it is a folder.
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: Path to the file or folder to delete, relative to the project folder.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File or folder deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message.
+        '400':
+          description: Missing path parameter or invalid target type.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+        '404':
+          description: File or folder not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+        '401':
+          description: Unauthorized access.
+
+
+  /project_map:
+    get:
+      operationId: getProjectMap
+      summary: Получить карту проекта
+      description: Возвращает текущую карту проекта. Карта содержит вложенные папки и файлы с их описанием.
+      responses:
+        '200':
+          description: Карта проекта успешно получена.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  description: Описание содержимого папки.
+                  additionalProperties:
+                    type: object
+                    description: Информация о файле.
+                    properties:
+                      description:
+                        type: string
+                        description: Описание файла.
+                      size:
+                        type: integer
+                        description: Размер файла в байтах.
+                      last_modified:
+                        type: integer
+                        description: Время последнего изменения файла в формате Unix.
+        '404':
+          description: Карта проекта не найдена.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Сообщение об ошибке.
+        '401':
+          description: Неавторизованный доступ.
+    post:
+      operationId: deletePathFromProjectMap
+      summary: Удалить элемент из карты проекта
+      description: Удаляет информацию о файле или папке из карты проекта.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: Путь к файлу или папке, которые нужно удалить из карты проекта.
+              required:
+                - path
+      responses:
+        '200':
+          description: Путь успешно удалён из карты проекта.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Уведомление об успешной операции.
+        '404':
+          description: Путь не найден в карте проекта.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Сообщение об ошибке.
+        '400':
+          description: Некорректный путь (например, путь отсутствует или передан в неправильном формате).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Сообщение об ошибке.
+        '500':
+          description: Ошибка сервера при удалении пути.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Сообщение об ошибке.
+        '401':
+          description: Неавторизованный доступ.
+    put:
+      operationId: updateFileInProjectMap
+      summary: Дополнить карту проекта данными о конкретном файле
+      description: Добавляет или обновляет информацию о файле в карте проекта. Если указанный путь не существует, создаёт необходимые директории.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: Путь к файлу (включая имя файла) внутри карты проекта.
+                  example: "root/subdir/new_file.txt"
+                description:
+                  type: string
+                  description: Описание файла.
+                  example: "This is a new file."
+                size:
+                  type: integer
+                  description: Размер файла в байтах. Должен быть неотрицательным.
+                  example: 1234
+                last_modified:
+                  type: number
+                  format: float
+                  description: Время последнего изменения файла в формате Unix-времени. Должно быть положительным.
+                  example: 1698765436.0
+              required:
+                - path
+                - description
+                - size
+                - last_modified
+      responses:
+        '200':
+          description: Файл успешно добавлен или обновлён в карте проекта.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Уведомление об успешной операции.
+        '400':
+          description: Некорректный формат данных или отсутствуют обязательные поля.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Сообщение об ошибке.
+        '500':
+          description: Ошибка сервера при обновлении карты проекта.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Сообщение об ошибке.
+        '401':
+          description: Неавторизованный доступ.
+
+
+  /update:
+    put:
+      operationId: updateFile
+      summary: Update an existing file
+      description: Updates the content and/or description of an existing file.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                  description: Path and name of the file to update.
+                content:
+                  type: string
+                  description: New content for the file.
+                description:
+                  type: string
+                  description: New description for the file.
+              required:
+                - filename
+  /get_file:
+    get:
+      operationId: getFileContent
+      summary: Retrieve file content
+      description: Returns the content of the specified file.
+      parameters:
+        - name: filename
+          in: query
+          required: true
+          description: Path to the file to retrieve.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File content retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+                    description: The content of the file.
+                  filename:
+                    type: string
+                    description: The path of the file.
+        '400':
+          description: Bad request, such as missing filename.
+        '404':
+          description: File not found.
+        '401':
+          description: Unauthorized access.
+
+  /history:
+    get:
+      operationId: getHistory
+      summary: Получить историю изменений проекта
+      description: Возвращает все записи из лога изменений проекта.
+      responses:
+        '200':
+          description: История изменений успешно получена.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    timestamp:
+                      type: integer
+                      description: Время изменения в секундах
+                    description:
+                      type: string
+                      description: Описание изменения
+                    affected_files:
+                      type: array
+                      items:
+                        type: string
+                      description: Список файлов, которые были затронуты изменением
+        '404':
+          description: История изменений не найдена.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Сообщение об ошибке
+    post:
+      operationId: logChange
+      summary: Записать изменение в лог истории
+      description: Записывает новое изменение в файл истории.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  description: Описание изменения
+                affected_files:
+                  type: array
+                  items:
+                    type: string
+                  description: Список файлов, которые были затронуты изменением
+              required:
+                - description
+      responses:
+        '201':
+          description: Изменение успешно записано.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Сообщение об успешной записи
+        '400':
+          description: Описание изменения обязательно.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Сообщение об ошибке
+
+components:
+  schemas: {}
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Используйте API-ключ в заголовке `Authorization` для авторизации.
