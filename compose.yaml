@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  project_manager:
+    image: gpt_storage
+    container_name: gpt_storage
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./blog_project:/app/blog_project
+    environment:
+      - FLASK_ENV=development
+      - API_KEY=key
+      - PROJECT_DIR=blog_project
