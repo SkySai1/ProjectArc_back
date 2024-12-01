@@ -7,7 +7,6 @@ WORKDIR /app
 # Копируем файлы в контейнер
 COPY requirements.txt requirements.txt
 COPY app.py app.py
-COPY utils.py utils.py
 
 # Создаём папку для файлов
 RUN mkdir files

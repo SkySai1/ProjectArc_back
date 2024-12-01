@@ -164,8 +164,6 @@ def delete():
             "message": f"File {path} was deleted successfully from both the file system and the project map."
         }), 200
 
-
-
 @app.route('/update', methods=['PUT'])
 @require_api_key
 def update_file():
@@ -416,6 +414,75 @@ def history():
 
         return jsonify(history_data), 200
 
+@app.route('/about', methods=['GET', 'POST', 'PUT'])
+@require_api_key
+def about_project():
+    """
+    Управление описанием проекта (один общий файл project_description.json):
+    - GET: Получить описание проекта.
+    - POST: Создать описание проекта.
+    - PUT: Обновить описание проекта.
+    """
+    # Путь к файлу с описанием проекта
+    project_description_file = os.path.join(BASE_DIR, "project_description.json")
+
+    if request.method == 'POST':
+        """Создание описания проекта."""
+        data = request.json
+        description = data.get("description")
+
+        if not description:
+            return jsonify({"error": "'description' is required."}), 400
+
+        # Проверка существования файла
+        if os.path.exists(project_description_file):
+            return jsonify({"error": "Project description already exists."}), 400
+
+        # Создание описания
+        project_description = {
+            "description": description,
+            "created_at": int(time.time())
+        }
+
+        with open(project_description_file, "w") as f:
+            json.dump(project_description, f, indent=4)
+
+        return jsonify({"message": "Project description created successfully."}), 201
+
+    elif request.method == 'PUT':
+        """Обновление описания проекта."""
+        data = request.json
+        new_description = data.get("description")
+
+        if not new_description:
+            return jsonify({"error": "'description' is required."}), 400
+
+        # Проверка существования файла
+        if not os.path.exists(project_description_file):
+            return jsonify({"error": "Project description does not exist."}), 404
+
+        # Обновление описания
+        with open(project_description_file, "r") as f:
+            project_description = json.load(f)
+
+        project_description["description"] = new_description
+        project_description["updated_at"] = int(time.time())
+
+        with open(project_description_file, "w") as f:
+            json.dump(project_description, f, indent=4)
+
+        return jsonify({"message": "Project description updated successfully."}), 200
+
+    elif request.method == 'GET':
+        """Получение описания проекта."""
+        if not os.path.exists(project_description_file):
+            return jsonify({"error": "Project description does not exist."}), 404
+
+        # Чтение описания
+        with open(project_description_file, "r") as f:
+            project_description = json.load(f)
+
+        return jsonify(project_description), 200
 
 
 @app.route('/privacy', methods=['GET'])
