@@ -1,25 +1,11 @@
+from datetime import datetime
 from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
 import time
 import os
 import json
 import shutil
 from functools import wraps
-
-app = Flask(__name__)
-
-# Параметры приложения
-BASE_DIR = os.getenv("PROJECT_DIR", "project_data")  # Директория проекта, можно задать через переменную окружения
-PROJECT_FOLDER = os.path.join(BASE_DIR, "files")    # Папка для файлов
-PROJECT_MAP = os.path.join(BASE_DIR, "project_map.json")  # Карта проекта
-API_KEY = os.getenv("API_KEY", "default_secret_api_key")  # API-ключ из переменной окружения
-
-# Создать директории для хранения данных
-os.makedirs(PROJECT_FOLDER, exist_ok=True)
-
-# Проверить наличие карты проекта и создать, если её нет
-if not os.path.exists(PROJECT_MAP):
-    with open(PROJECT_MAP, "w") as f:
-        json.dump({}, f)
 
 def require_api_key(f):
     """Декоратор для проверки API-ключа."""
@@ -31,21 +17,118 @@ def require_api_key(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def update_project_map():
-    """Обновление карты проекта с описаниями файлов."""
-    project_map = {}
-    for root, _, files in os.walk(PROJECT_FOLDER):
-        rel_path = os.path.relpath(root, PROJECT_FOLDER)
-        project_map[rel_path] = {}
-        for file in files:
-            file_path = os.path.join(root, file)
-            project_map[rel_path][file] = {
-                "description": f"Description for {file}",  # Здесь вы можете динамически добавлять описание
-                "size": os.path.getsize(file_path),
-                "last_modified": os.path.getmtime(file_path)
-            }
-    with open(PROJECT_MAP, "w") as f:
-        json.dump(project_map, f, indent=4)
+
+app = Flask(__name__)
+
+# Параметры приложения
+BASE_DIR = os.getenv("PROJECT_DIR", "project_data")  # Директория проекта, можно задать через переменную окружения
+ABS_DIR = os.path.abspath(BASE_DIR)  # Преобразуем в абсолютный путь
+PROJECT_FOLDER = os.path.join(BASE_DIR, "files")    # Папка для файлов
+PROJECT_MAP_DB = os.path.join(ABS_DIR, "project_map.db")  # Карта проекта
+API_KEY = os.getenv("API_KEY", "default_secret_api_key")  # API-ключ из переменной окружения
+
+# Относительный путь для работы с файлами через API
+RELATIVE_FILE_PATH = os.path.join("files")  # Относительный путь от корня папки с файлами проекта
+
+
+if not os.path.exists(BASE_DIR):
+    os.makedirs(BASE_DIR)
+
+# Конфигурация Flask для работы с SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{PROJECT_MAP_DB}"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# Создать директории для хранения данных
+os.makedirs(PROJECT_FOLDER, exist_ok=True)
+
+# Модель для записи в карту проекта
+class ProjectFile(db.Model):
+    __tablename__ = 'project_files'
+
+    id = db.Column(db.Integer, primary_key=True)
+    path = db.Column(db.String(512), unique=True, nullable=False)
+    type = db.Column(db.String(10), nullable=False)
+    description = db.Column(db.String(256), nullable=True)
+    size = db.Column(db.Integer, nullable=False)
+    last_modified = db.Column(db.Float, nullable=False)
+
+    def __repr__(self):
+        return f"<ProjectFile {self.path}>"
+
+# Функция для создания базы данных и таблиц, если они не существуют
+def create_db():
+    db_folder = os.path.dirname(PROJECT_MAP_DB)
+    
+    # Создаём директорию, если она не существует
+    if not os.path.exists(db_folder):
+        os.makedirs(db_folder)
+
+    if not os.path.exists(PROJECT_MAP_DB):
+        with app.app_context():
+            db.create_all()  # Создаст все таблицы, если они не существуют
+
+# Создание базы данных
+create_db()
+
+# Функция для добавления записи в карту проекта
+def add_project_file(path, type, description, size, last_modified):
+    project_file = ProjectFile(
+        path=path,
+        type=type,
+        description=description,
+        size=size,
+        last_modified=last_modified
+    )
+    db.session.add(project_file)
+    db.session.commit()
+
+# Функция для удаления записи из карты проекта
+def delete_project_file(path):
+    project_file = ProjectFile.query.filter_by(path=path).first()
+    if project_file:
+        db.session.delete(project_file)
+        db.session.commit()
+        return True
+    return False
+
+# Функция для обновления записи в карте проекта
+def update_project_file(path, description=None, size=None, last_modified=None):
+    project_file = ProjectFile.query.filter_by(path=path).first()
+    if project_file:
+        if description:
+            project_file.description = description
+        if size is not None:
+            project_file.size = size
+        if last_modified is not None:
+            project_file.last_modified = last_modified
+        db.session.commit()
+        return True
+    return False
+
+# Функция для получения записи из карты проекта
+def get_project_file(path):
+    project_file = ProjectFile.query.filter_by(path=path).first()
+    if project_file:
+        return {
+            'path': project_file.path,
+            'type': project_file.type,
+            'description': project_file.description,
+            'size': project_file.size,
+            'last_modified': project_file.last_modified
+        }
+    return None
+
+# Функция для получения всех записей из карты проекта
+def get_all_project_files():
+    project_files = ProjectFile.query.all()
+    return [{
+        'path': file.path,
+        'type': file.type,
+        'description': file.description,
+        'size': file.size,
+        'last_modified': file.last_modified
+    } for file in project_files]
 
 @app.route('/create', methods=['POST'])
 @require_api_key
@@ -59,44 +142,23 @@ def create_file():
     if not filename:
         return jsonify({"error": "Filename is required."}), 400
 
-    # Полный путь к файлу
     filepath = os.path.join(PROJECT_FOLDER, filename)
-    
-    # Проверка существования файла
+
     if os.path.exists(filepath):
         return jsonify({"error": "File already exists."}), 400
 
-    # Создание всех недостающих папок
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
-    # Создание нового файла
     with open(filepath, 'w') as f:
         f.write(content)
 
-    # Обновление только для нового файла в карте проекта
-    if os.path.exists(PROJECT_MAP):
-        with open(PROJECT_MAP, "r") as f:
-            project_map = json.load(f)
-    else:
-        project_map = {}
-
-    # Добавление новой информации в карту проекта
-    dir_path = os.path.dirname(filename)
-    base_filename = os.path.basename(filename)
-    relative_dir_path = os.path.relpath(os.path.dirname(filepath), PROJECT_FOLDER)
-
-    if relative_dir_path not in project_map:
-        project_map[relative_dir_path] = {}
-
-    project_map[relative_dir_path][base_filename] = {
-        "description": description,
-        "size": os.path.getsize(filepath),
-        "last_modified": os.path.getmtime(filepath)
-    }
-
-    # Сохранение обновленной карты проекта
-    with open(PROJECT_MAP, "w") as f:
-        json.dump(project_map, f, indent=4)
+    add_project_file(
+        path=filename,
+        type="file",
+        description=description,
+        size=os.path.getsize(filepath),
+        last_modified=os.path.getmtime(filepath)
+    )
 
     return jsonify({"message": f"File {filename} created successfully."}), 201
 
@@ -109,60 +171,21 @@ def delete():
     if not path:
         return jsonify({"error": "Path is required."}), 400
 
-    # Полный путь к файлу или папке
     target_path = os.path.join(PROJECT_FOLDER, path)
-    file_exists = os.path.exists(target_path)
 
-    # Удаление файла или папки, если существует
-    if file_exists:
+    if os.path.exists(target_path):
         if os.path.isfile(target_path):
             os.remove(target_path)
             message = f"File {path} deleted successfully."
-        elif os.path.isdir(target_path):
-            shutil.rmtree(target_path)
-            message = f"Folder {path} deleted successfully."
         else:
-            return jsonify({"error": "Unknown target type."}), 400
-    else:
-        return jsonify({"error": "File or folder does not exist."}), 404
+            os.rmdir(target_path)
+            message = f"Folder {path} deleted successfully."
 
-    # Удаление из карты проекта
-    if os.path.exists(PROJECT_MAP):
-        with open(PROJECT_MAP, "r") as f:
-            project_map = json.load(f)
-    else:
-        project_map = {}
+        delete_project_file(path)
 
-    # Удаление элемента из карты проекта
-    def delete_from_map(map_data, folder_path, file_name):
-        """Удаляет файл из карты проекта, учитывая вложенные папки."""
-        if folder_path in map_data and isinstance(map_data[folder_path], dict):
-            if file_name in map_data[folder_path]:
-                del map_data[folder_path][file_name]
-                # Удаляем папку, если она становится пустой
-                if not map_data[folder_path]:
-                    del map_data[folder_path]
-                return True
-        return False
+        return jsonify({"message": message}), 200
 
-    # Разделение пути на папку и файл
-    folder_path, file_name = os.path.split(path)
-    found_in_map = delete_from_map(project_map, folder_path, file_name)
-
-    # Сохраняем обновленную карту проекта, если были изменения
-    if found_in_map:
-        with open(PROJECT_MAP, "w") as f:
-            json.dump(project_map, f, indent=4)
-
-    # Возвращаем соответствующий статус
-    if file_exists and not found_in_map:
-        return jsonify({
-            "message": f"File {path} was found and deleted, but was not listed in the project map."
-        }), 207
-    elif file_exists and found_in_map:
-        return jsonify({
-            "message": f"File {path} was deleted successfully from both the file system and the project map."
-        }), 200
+    return jsonify({"error": "File or folder does not exist."}), 404
 
 @app.route('/update', methods=['PUT'])
 @require_api_key
@@ -176,89 +199,86 @@ def update_file():
     if not filename:
         return jsonify({"error": "Filename is required."}), 400
 
-    # Полный путь к файлу
     filepath = os.path.join(PROJECT_FOLDER, filename)
 
-    # Проверка существования файла
     if not os.path.isfile(filepath):
         return jsonify({"error": f"File {filename} does not exist."}), 404
 
-    # Обновление содержимого файла (если передано)
     if new_content is not None:
         with open(filepath, 'w') as f:
             f.write(new_content)
 
-    # Загрузка текущей карты проекта
-    if os.path.exists(PROJECT_MAP):
-        with open(PROJECT_MAP, "r") as f:
-            project_map = json.load(f)
-    else:
-        project_map = {}
-
-    # Найти путь файла в карте
-    dir_path = os.path.dirname(filename)
-    base_filename = os.path.basename(filename)
-
-    # Проверяем, существует ли директория в карте
-    if dir_path not in project_map:
-        return jsonify({"error": f"Directory {dir_path} not found in project map."}), 404
-
-    # Проверяем, существует ли файл в карте проекта
-    if base_filename not in project_map[dir_path]:
-        return jsonify({"error": f"File {base_filename} not found in project map."}), 404
-
-    # Обновляем описание файла, если передано
-    if new_description is not None:
-        project_map[dir_path][base_filename]["description"] = new_description
-
-    # Обновляем данные о файле
-    project_map[dir_path][base_filename]["size"] = os.path.getsize(filepath)
-    project_map[dir_path][base_filename]["last_modified"] = os.path.getmtime(filepath)
-
-    # Сохраняем изменения в карте проекта
-    with open(PROJECT_MAP, "w") as f:
-        json.dump(project_map, f, indent=4)
+    update_project_file(
+        path=filename,
+        description=new_description,
+        size=os.path.getsize(filepath),
+        last_modified=os.path.getmtime(filepath)
+    )
 
     return jsonify({"message": f"File {filename} updated successfully."}), 200
 
 @app.route('/get_file', methods=['GET'])
 @require_api_key
 def get_file():
-    """Получение содержимого файла."""
+    """Получение содержимого файла и информации о нем из базы данных."""
     filename = request.args.get("filename")
 
     if not filename:
         return jsonify({"error": "Filename is required."}), 400
 
-    # Полный путь к файлу
     filepath = os.path.join(PROJECT_FOLDER, filename)
 
-    # Проверка существования файла
     if not os.path.isfile(filepath):
-        return jsonify({"error": f"File {filename} does not exist."}), 404
+        return jsonify({"error": f"File {filename} does not exist on disk."}), 404
 
-    # Чтение содержимого файла
     try:
         with open(filepath, 'r') as f:
             content = f.read()
     except Exception as e:
         return jsonify({"error": f"Error reading file: {str(e)}"}), 500
 
-    return jsonify({"filename": filename, "content": content}), 200
+    # Попытка получить информацию о файле из базы данных
+    project_file = ProjectFile.query.filter_by(path=filename).first()
+
+    if project_file:
+        # Если файл найден в БД, возвращаем дополнительную информацию
+        return jsonify({
+            "filename": filename,
+            "content": content,
+            "description": project_file.description,
+            "size": project_file.size,
+            "last_modified": project_file.last_modified
+        }), 200
+    else:
+        # Если файл не найден в БД
+        return jsonify({
+            "filename": filename,
+            "content": content,
+            "message": "File not found in the project database."
+        }), 207
 
 
 @app.route('/project_map', methods=['GET', 'POST', 'PUT'])
 @require_api_key
 def project_map():
     if request.method == 'GET':
-        """Получить карту проекта."""
-        if not os.path.exists(PROJECT_MAP):
-            return jsonify({"error": "Project map does not exist."}), 404
+        """Получить карту проекта из базы данных."""
+        try:
+            project_files = ProjectFile.query.all()
 
-        with open(PROJECT_MAP, "r") as f:
-            project_map = json.load(f)
-
-        return jsonify(project_map), 200
+            project_map = [
+                {
+                    "path": file.path,
+                    "description": file.description,
+                    "size": file.size,
+                    "last_modified": datetime.fromtimestamp(file.last_modified).isoformat() if file.last_modified else None
+                }
+                for file in project_files
+            ]
+            
+            return jsonify(project_map), 200
+        except Exception as e:
+            return jsonify({"error": f"Failed to retrieve project map: {str(e)}"}), 500
 
     elif request.method == 'POST':
         """Удалить информацию о файле или папке из карты проекта."""
@@ -269,100 +289,43 @@ def project_map():
             return jsonify({"error": "Path must be a valid string."}), 400
 
         try:
-            # Загружаем текущую карту проекта
-            if os.path.exists(PROJECT_MAP):
-                with open(PROJECT_MAP, "r") as f:
-                    project_map = json.load(f)
+            # Пытаемся удалить запись о файле из базы данных
+            if delete_project_file(target_path):
+                return jsonify({"message": f"File '{target_path}' deleted from project database."}), 200
             else:
-                return jsonify({"error": "Project map does not exist."}), 404
-
-            # Рекурсивное удаление элемента или поддерева из карты проекта
-            def delete_path(map_data, full_path):
-                """
-                Удаляет путь из карты проекта, включая файлы и промежуточные узлы.
-                """
-                keys = list(map_data.keys())
-                for key in keys:
-                    # Если ключ совпадает с искомым путём
-                    if key == full_path:
-                        del map_data[key]
-                        return True
-                    # Если текущий ключ является поддиректорией
-                    if key in full_path:
-                        # Рекурсивный поиск в поддиректориях
-                        sub_path = full_path[len(key) + 1:]  # Убираем текущий ключ из пути
-                        if isinstance(map_data[key], dict) and delete_path(map_data[key], sub_path):
-                            # Если поддиректория пустая, удаляем её
-                            if not map_data[key]:
-                                del map_data[key]
-                            return True
-                return False
-
-            # Пытаемся удалить путь
-            if delete_path(project_map, target_path):
-                # Сохраняем обновлённую карту
-                with open(PROJECT_MAP, "w") as f:
-                    json.dump(project_map, f, indent=4)
-                return jsonify({"message": f"Path '{target_path}' deleted from project map."}), 200
-            else:
-                return jsonify({"error": f"Path '{target_path}' not found in project map."}), 404
-
+                return jsonify({"error": f"File '{target_path}' not found in project database."}), 404
         except Exception as e:
             return jsonify({"error": f"Failed to delete path from project map: {str(e)}"}), 500
 
     elif request.method == 'PUT':
-        """Дополнить карту проекта данными о конкретном файле."""
-        data = request.json
-
-        # Проверка наличия обязательных ключей
-        required_keys = {"path", "description", "size", "last_modified"}
-        if not data or not isinstance(data, dict):
-            return jsonify({"error": "Invalid data format. A JSON object is required."}), 400
-        if not required_keys.issubset(data.keys()):
-            return jsonify({"error": f"Missing required keys. Required keys are: {list(required_keys)}"}), 400
-
-        path = data["path"]
-        description = data["description"]
-        size = data["size"]
-        last_modified = data["last_modified"]
-
-        # Проверка типов данных
-        if not isinstance(path, str) or not path:
-            return jsonify({"error": "Path must be a non-empty string."}), 400
-        if not isinstance(description, str) or not description:
-            return jsonify({"error": "Description must be a non-empty string."}), 400
-        if not isinstance(size, int) or size < 0:
-            return jsonify({"error": "Size must be a non-negative integer."}), 400
-        if not isinstance(last_modified, (int, float)) or last_modified <= 0:
-            return jsonify({"error": "Last_modified must be a positive number."}), 400
-
         try:
-            # Загружаем текущую карту проекта
-            if os.path.exists(PROJECT_MAP):
-                with open(PROJECT_MAP, "r") as f:
-                    project_map = json.load(f)
-            else:
-                project_map = {}
+            """Обновление информации о файле в базе данных."""
+            data = request.json
+            filename = data.get("path")
+            new_description = data.get("description", None)
 
-            # Разбиваем путь на директорию и имя файла
-            dir_path, file_name = os.path.split(path)
+            if not filename:
+                return jsonify({"error": "Filename is required."}), 400
 
-            # Проверка и создание вложенной структуры
-            if dir_path not in project_map:
-                project_map[dir_path] = {}
+            filepath = os.path.join(PROJECT_FOLDER, filename)
 
-            # Добавление или обновление информации о файле
-            project_map[dir_path][file_name] = {
-                "description": description,
-                "size": size,
-                "last_modified": last_modified
-            }
+            if not os.path.isfile(filepath):
+                return jsonify({"error": f"File {filename} does not exist."}), 404
 
-            # Сохраняем обновлённую карту
-            with open(PROJECT_MAP, "w") as f:
-                json.dump(project_map, f, indent=4)
+            # Получаем актуальные данные о файле на диске
+            file_size = os.path.getsize(filepath)
+            last_modified = os.path.getmtime(filepath)
 
-            return jsonify({"message": f"File '{path}' successfully added or updated in the project map."}), 200
+            # Обновляем информацию о файле в базе данных
+            update_project_file(
+                path=filename,
+                description=new_description,
+                size=file_size,
+                last_modified=last_modified
+            )
+
+            return jsonify({"message": f"File {filename} information updated successfully."}), 200
+
         except Exception as e:
             return jsonify({"error": f"Failed to update project map: {str(e)}"}), 500
         
@@ -505,3 +468,4 @@ def privacy_policy():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+    # Создание базы данных, если она не существует
