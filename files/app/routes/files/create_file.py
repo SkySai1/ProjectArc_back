@@ -1,7 +1,6 @@
 from flask import request, jsonify
 from app import app
 import os
-from app.utils import log_change
 
 @app.route('/create', methods=['POST'])
 def create_file():

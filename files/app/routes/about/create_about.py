@@ -3,7 +3,6 @@ from app import app
 import os
 import json
 import time
-from app.utils import log_change
 
 @app.route('/about', methods=['POST'])
 def create_about():
@@ -32,8 +31,5 @@ def create_about():
 
     with open(ABOUT_FILE, "w") as f:
         json.dump(project_description, f, indent=4)
-
-    # Логируем изменение
-    log_change("Project description created", affected_files=["project_description.json"])
 
     return jsonify({"message": "Project description created successfully."}), 201
