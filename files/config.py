@@ -1,5 +1,8 @@
 import os
 
+BASE_DIR = os.getenv("PROJECT_DIR", "project_data")
+
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///project.db')
+    BASE_DIR = BASE_DIR
+    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.abspath(os.path.join(BASE_DIR, 'project_map.db'))}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False

@@ -4,11 +4,6 @@ from flask import Flask
 BASE_URL = "/project_map"
 CREATE_URL = "/create"
 
-@pytest.fixture
-def client():
-    from app import app
-    with app.test_client() as client:
-        yield client
 
 def test_create_file_missing_filename(client):
     """Тест: создание файла без 'filename'."""

@@ -1,14 +1,16 @@
 import os
 import json
 import time
+from app import app
 from app import db
 from app.models import ProjectFile
 
 # Путь для истории изменений
-HISTORY_FILE = os.path.join(os.getenv("PROJECT_DIR", "project_data"), "history_log.json")
+
 
 def log_change(description, affected_files):
     """Логирование изменений в проекте."""
+    HISTORY_FILE = os.path.join(app.config["BASE_DIR"], "history_log.json")
     log_entry = {
         "timestamp": int(time.time()),  # Время изменения
         "description": description,
