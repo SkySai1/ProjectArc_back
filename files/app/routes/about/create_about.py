@@ -1,15 +1,13 @@
-from flask import request, jsonify
-from app import app
+from flask import request, jsonify, current_app
 import os
 import json
 import time
 
-@app.route('/about', methods=['POST'])
 def create_about():
     """
     Создание описания проекта.
     """
-    BASE_DIR = app.config["BASE_DIR"]
+    BASE_DIR = current_app.config["BASE_DIR"]
     ABOUT_FILE = os.path.join(BASE_DIR, "project_description.json")
 
     data = request.json
@@ -18,7 +16,7 @@ def create_about():
     if not description:
         return jsonify({"error": "'description' is required."}), 400
 
-    os.makedirs(BASE_DIR, exist_ok=True)  # Создание директории, если её нет
+    os.makedirs(BASE_DIR, exist_ok=True)
 
     if os.path.exists(ABOUT_FILE):
         return jsonify({"error": "Project description already exists."}), 400

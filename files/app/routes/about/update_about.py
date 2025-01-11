@@ -1,15 +1,13 @@
-from flask import request, jsonify
-from app import app
+from flask import request, jsonify, current_app
 import os
 import json
 import time
 
-@app.route('/about', methods=['PUT'])
 def update_about():
     """
     Обновление описания проекта.
     """
-    BASE_DIR = app.config["BASE_DIR"]
+    BASE_DIR = current_app.config["BASE_DIR"]
     ABOUT_FILE = os.path.join(BASE_DIR, "project_description.json")
 
     data = request.json

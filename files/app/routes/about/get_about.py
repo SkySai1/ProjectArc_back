@@ -1,14 +1,12 @@
-from flask import jsonify
-from app import app
+from flask import jsonify, current_app
 import os
 import json
 
-@app.route('/about', methods=['GET'])
 def get_about():
     """
     Получение описания проекта.
     """
-    BASE_DIR = app.config["BASE_DIR"]
+    BASE_DIR = current_app.config["BASE_DIR"]
     ABOUT_FILE = os.path.join(BASE_DIR, "project_description.json")
 
     if not os.path.exists(ABOUT_FILE):
