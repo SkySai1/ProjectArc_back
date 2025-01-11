@@ -1,3 +1,7 @@
-blog_project/
+example_project/
+instance/
+project_data/
+__pycache__
 *_project/
 .gitignore
+.venv
