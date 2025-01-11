@@ -8,25 +8,6 @@ from app.models import ProjectFile
 # Путь для истории изменений
 
 
-def log_change(description, affected_files):
-    """Логирование изменений в проекте."""
-    HISTORY_FILE = os.path.join(app.config["BASE_DIR"], "history_log.json")
-    log_entry = {
-        "timestamp": int(time.time()),  # Время изменения
-        "description": description,
-        "affected_files": affected_files
-    }
-
-    if not os.path.exists(HISTORY_FILE):
-        with open(HISTORY_FILE, "w") as f:
-            json.dump([log_entry], f, indent=4)
-    else:
-        with open(HISTORY_FILE, "r+") as f:
-            logs = json.load(f)
-            logs.append(log_entry)
-            f.seek(0)
-            json.dump(logs, f, indent=4)
-
 def add_project_file(path, type, description, size, last_modified):
     """Добавление записи о файле в карту проекта."""
     project_file = ProjectFile(

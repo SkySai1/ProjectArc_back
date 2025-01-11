@@ -22,7 +22,4 @@ def update_file():
     if not os.path.exists(file_path):
         return jsonify({"error": f"File '{path}' does not exist."}), 404
 
-    # Логируем обновление файла
-    log_change(f"File {path} updated", affected_files=[path])
-
     return jsonify({"message": f"File {path} information updated successfully."}), 200

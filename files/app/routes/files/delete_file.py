@@ -23,7 +23,4 @@ def delete_file():
 
     os.remove(file_path)
 
-    # Логируем удаление файла
-    log_change(f"File {path} deleted", affected_files=[path])
-
     return jsonify({"message": f"File '{path}' deleted from project database."}), 200

@@ -28,7 +28,4 @@ def create_file():
     with open(file_path, "w") as f:
         f.write(content)
 
-    # Логируем создание файла
-    log_change(f"File {filename} created", affected_files=[filename])
-
     return jsonify({"message": f"File {filename} created successfully."}), 201
