@@ -1,13 +1,32 @@
 import os
 import json
 import time
+from app import db
+from app.models import ProjectFile
 
-HISTORY_FILE = "project_data/history.json"
+# Путь для истории изменений
+HISTORY_FILE = os.path.join(os.getenv("PROJECT_DIR", "project_data"), "history_log.json")
 
-# --- Работа с картой проекта ---
+def log_change(description, affected_files):
+    """Логирование изменений в проекте."""
+    log_entry = {
+        "timestamp": int(time.time()),  # Время изменения
+        "description": description,
+        "affected_files": affected_files
+    }
+
+    if not os.path.exists(HISTORY_FILE):
+        with open(HISTORY_FILE, "w") as f:
+            json.dump([log_entry], f, indent=4)
+    else:
+        with open(HISTORY_FILE, "r+") as f:
+            logs = json.load(f)
+            logs.append(log_entry)
+            f.seek(0)
+            json.dump(logs, f, indent=4)
 
 def add_project_file(path, type, description, size, last_modified):
-    from app import db, ProjectFile
+    """Добавление записи о файле в карту проекта."""
     project_file = ProjectFile(
         path=path,
         type=type,
@@ -19,7 +38,7 @@ def add_project_file(path, type, description, size, last_modified):
     db.session.commit()
 
 def delete_project_file(path):
-    from app import db, ProjectFile
+    """Удаление записи о файле из карты проекта."""
     project_file = ProjectFile.query.filter_by(path=path).first()
     if project_file:
         db.session.delete(project_file)
@@ -28,7 +47,7 @@ def delete_project_file(path):
     return False
 
 def update_project_file(path, description=None, size=None, last_modified=None):
-    from app import db, ProjectFile
+    """Обновление записи о файле в карте проекта."""
     project_file = ProjectFile.query.filter_by(path=path).first()
     if project_file:
         if description:
@@ -42,7 +61,7 @@ def update_project_file(path, description=None, size=None, last_modified=None):
     return False
 
 def get_project_file(path):
-    from app import ProjectFile
+    """Получение записи о файле из карты проекта."""
     project_file = ProjectFile.query.filter_by(path=path).first()
     if project_file:
         return {
@@ -55,26 +74,12 @@ def get_project_file(path):
     return None
 
 def get_all_project_files():
-    from app import ProjectFile
+    """Получение всех записей из карты проекта."""
     project_files = ProjectFile.query.all()
-    return [{
+    return [ {
         'path': file.path,
         'type': file.type,
         'description': file.description,
         'size': file.size,
         'last_modified': file.last_modified
-    } for file in project_files]
-
-# --- Создание базы данных ---
-
-def create_db(project_map_db):
-    from app import db
-    db_folder = os.path.dirname(project_map_db)
-
-    # Создаём директорию, если она не существует
-    if not os.path.exists(db_folder):
-        os.makedirs(db_folder)
-
-    if not os.path.exists(project_map_db):
-        with db.app.app_context():
-            db.create_all()
+    } for file in project_files ]
