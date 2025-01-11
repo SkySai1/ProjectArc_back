@@ -2,7 +2,7 @@ import pytest
 import os
 import tempfile
 import shutil
-from app import app as flask_app, db
+from app import app as flask_app
 
 @pytest.fixture(scope="session")
 def temp_test_dir():
@@ -14,30 +14,31 @@ def temp_test_dir():
 
 @pytest.fixture(scope="session", autouse=True)
 def app(temp_test_dir):
-    """Фикстура для тестового клиента Flask."""
-    # Создаём временную базу данных
-    tmp_dir = os.environ.get("PROJECT_DIR")
-    db_fd, db_path = tempfile.mkstemp()
-    flask_app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{tmp_dir}/{db_path}"
+    """
+    Фикстура для тестового клиента Flask.
+    """
+    # Создаём временную базу данных в temp_test_dir
+    db_path = os.path.join(temp_test_dir, "test.db")
+    flask_app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
     flask_app.config["TESTING"] = True
     flask_app.config["BASE_DIR"] = temp_test_dir
+
+    # Переподключаем SQLAlchemy для работы с новой конфигурацией
+    from app import db
+    db.init_app(flask_app)
 
     with flask_app.app_context():
         db.create_all()
 
     yield flask_app
 
-    os.close(db_fd)
-    os.unlink(db_path)
+    # Удаляем базу данных после завершения тестов
+    if os.path.exists(db_path):
+        os.remove(db_path)
+
 
 @pytest.fixture(scope="module")
 def client(app):
     """Фикстура для тестового клиента Flask."""
     return app.test_client()
 
-@pytest.fixture(autouse=True)
-def reset_database(app):
-    """Сбрасывает базу данных перед каждым тестом."""
-    with app.app_context():
-        db.drop_all()
-        db.create_all()

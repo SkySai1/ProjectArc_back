@@ -1,8 +1,9 @@
 from flask import request, jsonify
 from app import app
 import os
+from app.utils import delete_project_file
 
-@app.route('/project_map', methods=['POST'])
+@app.route('/delete', methods=['GET'])
 def delete_file():
     """
     Удаление файла из проекта.
@@ -20,6 +21,11 @@ def delete_file():
     if not os.path.exists(file_path):
         return jsonify({"error": f"File '{path}' does not exist."}), 404
 
+    # Удаляем файл из файловой системы
     os.remove(file_path)
 
-    return jsonify({"message": f"File '{path}' deleted from project database."}), 200
+    # Удаляем запись из карты проекта
+    if delete_project_file(path):
+        return jsonify({"message": f"File '{path}' deleted from project database."}), 200
+
+    return jsonify({"error": f"File '{path}' not found in project database."}), 404

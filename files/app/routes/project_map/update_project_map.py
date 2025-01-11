@@ -4,37 +4,28 @@ from app.utils import update_project_file
 import os
 
 @app.route('/project_map', methods=['PUT'])
-def update_project_map():
+def update_map():
     """
-    Обновление информации о файле в базе данных.
+    Обновление описания файла в проекте.
     """
-    try:
-        BASE_DIR = app.config["BASE_DIR"]
-        PROJECT_FOLDER = os.path.join(BASE_DIR, "files")
+    BASE_DIR = app.config["BASE_DIR"]
 
-        data = request.json
-        filename = data.get("path")
-        new_description = data.get("description", None)
+    data = request.json
+    path = data.get("path")
+    description = data.get("description")
 
-        if not filename:
-            return jsonify({"error": "Filename is required."}), 400
+    if not path or not description:
+        return jsonify({"error": "'path' and 'description' are required."}), 400
 
-        filepath = os.path.join(PROJECT_FOLDER, filename)
+    file_path = os.path.join(BASE_DIR, path)
 
-        if not os.path.isfile(filepath):
-            return jsonify({"error": f"File {filename} does not exist."}), 404
+    if not os.path.exists(file_path):
+        return jsonify({"error": f"File '{path}' does not exist."}), 404
 
-        file_size = os.path.getsize(filepath)
-        last_modified = os.path.getmtime(filepath)
+    # Обновляем запись в базе данных
+    file_size = os.path.getsize(file_path)
+    last_modified = os.path.getmtime(file_path)
+    if update_project_file(path, description, file_size, last_modified):
+        return jsonify({"message": f"File {path} information updated successfully."}), 200
 
-        update_project_file(
-            path=filename,
-            description=new_description,
-            size=file_size,
-            last_modified=last_modified
-        )
-
-        return jsonify({"message": f"File {filename} information updated successfully."}), 200
-
-    except Exception as e:
-        return jsonify({"error": f"Failed to update project map: {str(e)}"}), 500
+    return jsonify({"error": f"Failed to update file '{path}' in project database."}), 500

@@ -1,20 +1,26 @@
-from flask import jsonify
-from app import app
-import os
-import json
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
-@app.route('/history', methods=['GET'])
-def get_history():
+# Создание экземпляра SQLAlchemy
+db = SQLAlchemy()
+
+def create_app(config_class=None):
     """
-    Получить историю изменений.
+    Фабрика для создания приложения Flask.
     """
-    BASE_DIR = app.config["BASE_DIR"]
-    HISTORY_FILE = os.path.join(BASE_DIR, "history_log.json")
+    app = Flask(__name__)
+    if config_class:
+        app.config.from_object(config_class)
 
-    if not os.path.exists(HISTORY_FILE):
-        return jsonify({"error": "No history found."}), 404
+    # Инициализация SQLAlchemy
+    db.init_app(app)
 
-    with open(HISTORY_FILE, "r") as f:
-        history_data = json.load(f)
+    # Регистрация маршрутов
+    with app.app_context():
+        from app.routes.files import create_file, delete_file, update_file
+        from app.routes.project_map import get_project_map, delete_from_map, update_project_map
+        from app.routes.history import get_history, log_change
+        from app.routes.about import get_about, create_about, update_about
+        from app.routes.privacy import privacy_policy
 
-    return jsonify(history_data), 200
+    return app

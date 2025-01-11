@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from app import app
 import os
+from app.utils import add_project_file
 
 @app.route('/create', methods=['POST'])
 def create_file():
@@ -26,5 +27,16 @@ def create_file():
 
     with open(file_path, "w") as f:
         f.write(content)
+
+    # Добавляем файл в базу данных
+    file_size = os.path.getsize(file_path)
+    last_modified = os.path.getmtime(file_path)
+    add_project_file(
+        path=filename,
+        type='file',
+        description=description or "No description provided",
+        size=file_size,
+        last_modified=last_modified
+    )
 
     return jsonify({"message": f"File {filename} created successfully."}), 201

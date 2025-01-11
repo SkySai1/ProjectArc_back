@@ -1,8 +1,9 @@
 import pytest
 from flask import Flask
 
-BASE_URL = "/project_map"
 CREATE_URL = "/create"
+UPDATE_URL = "/update"
+DELETE_URL = "/delete"
 
 
 def test_create_file_missing_filename(client):
@@ -30,13 +31,13 @@ def test_delete_file(client):
     })
 
     # Удаление файла
-    response = client.post(BASE_URL, json={"path": "test.txt"})
+    response = client.get(DELETE_URL, json={"path": "test.txt"})
     assert response.status_code == 200
     assert response.json["message"] == "File 'test.txt' deleted from project database."
 
 def test_delete_file_nonexistent(client):
     """Тест: удаление несуществующего файла."""
-    response = client.post(BASE_URL, json={"path": "nonexistent.txt"})
+    response = client.get(DELETE_URL, json={"path": "nonexistent.txt"})
     assert response.status_code == 404
     assert response.json["error"] == "File 'nonexistent.txt' does not exist."
 
@@ -45,12 +46,13 @@ def test_update_file(client):
     # Создание файла для теста
     client.post(CREATE_URL, json={
         "filename": "test.txt",
-        "content": "Hello, World!"
+        "content": "Hello, World!",
     })
 
-    # Обновление описания файла
-    response = client.put(BASE_URL, json={
-        "path": "test.txt",
+    # Обновление файла
+    response = client.put(UPDATE_URL, json={
+        "filename": "test.txt",
+        "content": "Buy, World!",
         "description": "Updated description"
     })
     assert response.status_code == 200
@@ -58,8 +60,8 @@ def test_update_file(client):
 
 def test_update_file_nonexistent(client):
     """Тест: обновление описания для несуществующего файла."""
-    response = client.put(BASE_URL, json={
-        "path": "nonexistent.txt",
+    response = client.put(UPDATE_URL, json={
+        "filename": "nonexistent.txt",
         "description": "Updated description"
     })
     assert response.status_code == 404
