@@ -4,12 +4,14 @@ import os
 import json
 import time
 
-BASE_DIR = "project_data"
-ABOUT_FILE = os.path.join(BASE_DIR, "project_description.json")
-
 @app.route('/about', methods=['PUT'])
 def update_about():
-    """Обновление описания проекта."""
+    """
+    Обновление описания проекта.
+    """
+    BASE_DIR = app.config["BASE_DIR"]
+    ABOUT_FILE = os.path.join(BASE_DIR, "project_description.json")
+
     data = request.json
     new_description = data.get("description")
 

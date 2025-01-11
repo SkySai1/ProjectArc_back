@@ -3,13 +3,13 @@ from app import app
 import os
 from app.utils import log_change
 
-BASE_DIR = "project_data"
-
 @app.route('/project_map', methods=['POST'])
 def delete_file():
     """
     Удаление файла из проекта.
     """
+    BASE_DIR = app.config["BASE_DIR"]
+
     data = request.json
     path = data.get("path")
 

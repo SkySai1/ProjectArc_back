@@ -3,12 +3,15 @@ from app import app
 from app.utils import update_project_file
 import os
 
-PROJECT_FOLDER = "project_data/files"
-
 @app.route('/project_map', methods=['PUT'])
 def update_project_map():
-    """Обновление информации о файле в базе данных."""
+    """
+    Обновление информации о файле в базе данных.
+    """
     try:
+        BASE_DIR = app.config["BASE_DIR"]
+        PROJECT_FOLDER = os.path.join(BASE_DIR, "files")
+
         data = request.json
         filename = data.get("path")
         new_description = data.get("description", None)

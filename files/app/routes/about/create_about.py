@@ -5,14 +5,14 @@ import json
 import time
 from app.utils import log_change
 
-BASE_DIR = "project_data"
-ABOUT_FILE = os.path.join(BASE_DIR, "project_description.json")
-
 @app.route('/about', methods=['POST'])
 def create_about():
     """
     Создание описания проекта.
     """
+    BASE_DIR = app.config["BASE_DIR"]
+    ABOUT_FILE = os.path.join(BASE_DIR, "project_description.json")
+
     data = request.json
     description = data.get("description")
 

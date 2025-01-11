@@ -3,14 +3,14 @@ from app import app
 import os
 import json
 
-BASE_DIR = "project_data"
-ABOUT_FILE = os.path.join(BASE_DIR, "project_description.json")
-
 @app.route('/about', methods=['GET'])
 def get_about():
     """
     Получение описания проекта.
     """
+    BASE_DIR = app.config["BASE_DIR"]
+    ABOUT_FILE = os.path.join(BASE_DIR, "project_description.json")
+
     if not os.path.exists(ABOUT_FILE):
         return jsonify({"error": "Project description does not exist."}), 404
 

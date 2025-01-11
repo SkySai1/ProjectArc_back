@@ -4,7 +4,9 @@ from app.utils import delete_project_file
 
 @app.route('/project_map', methods=['POST'])
 def delete_from_map():
-    """Удалить информацию о файле или папке из карты проекта."""
+    """
+    Удалить информацию о файле или папке из карты проекта.
+    """
     data = request.json
     target_path = data.get("path")
 

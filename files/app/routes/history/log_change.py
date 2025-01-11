@@ -4,12 +4,14 @@ import os
 import json
 import time
 
-BASE_DIR = "project_data"
-HISTORY_FILE = os.path.join(BASE_DIR, "history_log.json")
-
 @app.route('/history', methods=['POST'])
 def log_change():
-    """Записать изменение в лог истории."""
+    """
+    Записать изменение в лог истории.
+    """
+    BASE_DIR = app.config["BASE_DIR"]
+    HISTORY_FILE = os.path.join(BASE_DIR, "history_log.json")
+
     data = request.json
     description = data.get("description")
     affected_files = data.get("affected_files", [])

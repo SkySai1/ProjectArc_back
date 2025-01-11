@@ -5,7 +5,9 @@ from datetime import datetime
 
 @app.route('/project_map', methods=['GET'])
 def get_project_map():
-    """Получить карту проекта из базы данных."""
+    """
+    Получить карту проекта из базы данных.
+    """
     try:
         project_files = ProjectFile.query.all()
 

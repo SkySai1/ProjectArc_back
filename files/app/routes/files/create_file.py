@@ -3,13 +3,13 @@ from app import app
 import os
 from app.utils import log_change
 
-BASE_DIR = "project_data"
-
 @app.route('/create', methods=['POST'])
 def create_file():
     """
     Создание нового файла в проекте.
     """
+    BASE_DIR = app.config["BASE_DIR"]
+
     data = request.json
     filename = data.get("filename")
     content = data.get("content")
