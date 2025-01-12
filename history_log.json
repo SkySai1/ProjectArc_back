@@ -293,5 +293,14 @@
             "app/routes/history/log_change.py",
             "tests/test_history.py"
         ]
+    },
+    {
+        "timestamp": 1736677368,
+        "description": "\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043c\u0430\u0440\u0448\u0440\u0443\u0442\u0430 privacy_policy \u0441 \u0438\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0438\u0435\u0439 \u0447\u0435\u0440\u0435\u0437 Blueprint \u0438 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u043e\u0439 \u043c\u043d\u043e\u0433\u043e\u044f\u0437\u044b\u0447\u043d\u043e\u0441\u0442\u0438, \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u0435 \u0442\u0435\u0441\u0442\u043e\u0432 \u0434\u043b\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 \u0440\u0430\u0431\u043e\u0442\u044b \u043c\u0430\u0440\u0448\u0440\u0443\u0442\u0430.",
+        "affected_files": [
+            "app/routes/privacy/__init__.py",
+            "app/routes/privacy/privacy_policy.py",
+            "tests/test_privacy.py"
+        ]
     }
 ]

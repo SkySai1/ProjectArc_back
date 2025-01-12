@@ -18,11 +18,11 @@ def create_app(config_class=None):
     from app.routes.files import files_bp
     #from app.routes.project_map import project_map_bp
     from app.routes.history import history_bp
-    #from app.routes.privacy import privacy_bp
+    from app.routes.privacy import privacy_bp
     app.register_blueprint(about_bp, url_prefix='/about')
     app.register_blueprint(files_bp, url_prefix='/files')
     #app.register_blueprint(project_map_bp, url_prefix='/project_map')
     app.register_blueprint(history_bp, url_prefix='/history')
-    #app.register_blueprint(privacy_bp, url_prefix='/privacy')
+    app.register_blueprint(privacy_bp, url_prefix='/privacy')
 
     return app
