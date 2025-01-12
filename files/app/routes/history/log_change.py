@@ -1,15 +1,13 @@
-from flask import request, jsonify
-from app import app
+from flask import request, jsonify, current_app
 import os
 import json
 import time
 
-@app.route('/history', methods=['POST'])
 def log_change():
     """
     Записать изменение в лог истории.
     """
-    BASE_DIR = app.config["BASE_DIR"]
+    BASE_DIR = current_app.config["BASE_DIR"]
     HISTORY_FILE = os.path.join(BASE_DIR, "history_log.json")
 
     data = request.json

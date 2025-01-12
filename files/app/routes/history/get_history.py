@@ -1,26 +1,21 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask import jsonify, current_app
+import os
+import json
 
-# Создание экземпляра SQLAlchemy
-db = SQLAlchemy()
-
-def create_app(config_class=None):
+def get_history():
     """
-    Фабрика для создания приложения Flask.
+    Получение истории изменений.
     """
-    app = Flask(__name__)
-    if config_class:
-        app.config.from_object(config_class)
+    BASE_DIR = current_app.config["BASE_DIR"]
+    HISTORY_FILE = os.path.join(BASE_DIR, "history_log.json")
 
-    # Инициализация SQLAlchemy
-    db.init_app(app)
+    if not os.path.exists(HISTORY_FILE):
+        return jsonify({"error": "History log file does not exist."}), 404
 
-    # Регистрация маршрутов
-    with app.app_context():
-        from app.routes.files import create_file, delete_file, update_file
-        from app.routes.project_map import get_project_map, delete_from_map, update_project_map
-        from app.routes.history import get_history, log_change
-        from app.routes.about import get_about, create_about, update_about
-        from app.routes.privacy import privacy_policy
+    with open(HISTORY_FILE, "r") as f:
+        try:
+            history = json.load(f)
+        except json.JSONDecodeError:
+            history = []
 
-    return app
+    return jsonify(history), 200
