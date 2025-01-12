@@ -302,5 +302,16 @@
             "app/routes/privacy/privacy_policy.py",
             "tests/test_privacy.py"
         ]
+    },
+    {
+        "timestamp": 1736678564,
+        "description": "\u041e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435 \u043c\u0430\u0440\u0448\u0440\u0443\u0442\u043e\u0432 project_map \u0434\u043b\u044f \u0438\u043d\u0442\u0435\u0433\u0440\u0430\u0446\u0438\u0438 \u0447\u0435\u0440\u0435\u0437 Blueprint. \u041e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435 \u0442\u0435\u0441\u0442\u043e\u0432 \u0434\u043b\u044f \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u043e\u0439 \u0440\u0430\u0431\u043e\u0442\u044b \u0441 \u043d\u043e\u0432\u044b\u043c\u0438 \u043c\u0430\u0440\u0448\u0440\u0443\u0442\u0430\u043c\u0438 \u0438 \u043c\u0435\u0442\u043e\u0434\u0430\u043c\u0438.",
+        "affected_files": [
+            "app/routes/project_map/__init__.py",
+            "app/routes/project_map/get_project_map.py",
+            "app/routes/project_map/delete_from_map.py",
+            "app/routes/project_map/update_project_map.py",
+            "tests/test_project_map.py"
+        ]
     }
 ]

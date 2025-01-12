@@ -1,14 +1,12 @@
-from flask import request, jsonify
-from app import app
+from flask import request, jsonify, current_app
 import os
 from app.utils import delete_project_file
 
-@app.route('/project_map', methods=['POST'])
 def delete_from_map():
     """
     Удаление файла из проекта.
     """
-    BASE_DIR = app.config["BASE_DIR"]
+    BASE_DIR = current_app.config["BASE_DIR"]
 
     data = request.json
     path = data.get("path")

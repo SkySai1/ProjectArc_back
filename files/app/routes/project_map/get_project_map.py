@@ -1,9 +1,7 @@
 from flask import jsonify
-from app import app
 from app.models import ProjectFile
 from datetime import datetime
 
-@app.route('/project_map', methods=['GET'])
 def get_project_map():
     """
     Получить карту проекта из базы данных.
