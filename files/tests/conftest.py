@@ -31,10 +31,14 @@ def app(temp_test_dir):
     """
     Фикстура для тестового клиента Flask.
     """
-    app = create_app(TestConfig(temp_test_dir))  # Передаём TestConfig с временной директорией
+    app = create_app(TestConfig(temp_test_dir))
 
     with app.app_context():
         db.create_all()
+
+        # Отладка: Проверка регистрации SQLAlchemy
+        if 'sqlalchemy' not in app.extensions:
+            print("ERROR: SQLAlchemy not registered in app.extensions")
 
     yield app
 

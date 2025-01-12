@@ -28,6 +28,12 @@ pytest tests/test_files.py
 pytest -v
 ```
 
+## Режим отладки
+
+```bash
+pytest -s --log-cli-level=DEBUG tests
+```
+
 ## Описание тестов
 - `test_files.py` – тесты для маршрутов работы с файлами.
 - `test_project_map.py` – тесты для работы с картой проекта.
