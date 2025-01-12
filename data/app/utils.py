@@ -61,7 +61,7 @@ def get_project_file(path):
         }
     return None
 
-def get_all_project_files():
+def get_list_project_files():
     """
     Получение всех записей из карты проекта.
     """
