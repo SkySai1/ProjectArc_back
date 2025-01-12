@@ -38,14 +38,18 @@
 graph TD
     %% Определение стилей для различных типов узлов
     classDef appStyle fill:#2c3e50, stroke:#1a252f, color:#ffffff, stroke-width:2px;
+    classDef clientStyle fill:#43c910, stroke:#1a252f, color:#ffffff, stroke-width:2px;
     classDef routeStyle fill:#3498db, stroke:#2980b9, color:#ffffff, stroke-width:2px;
     classDef utilStyle fill:#8e44ad, stroke:#6c3483, color:#ffffff, stroke-width:2px;
     classDef modelStyle fill:#16a085, stroke:#117a65, color:#ffffff, stroke-width:2px;
     classDef systemStyle fill:#f39c12, stroke:#d68910, color:#ffffff, stroke-width:2px;
+    classDef configStyle fill:#34495e, stroke:#2c3e50, color:#ffffff, stroke-width:2px;
 
     %% Узлы диаграммы
-    A[Запросы клиента]:::appStyle
+    A[Запросы клиента]:::clientStyle
     B[app/__init__.py]:::appStyle
+    H[run.py Точка входа]:::appStyle
+    I[config.py Настройки]:::configStyle
 
     subgraph Маршруты
         C[Маршруты API]:::routeStyle
@@ -72,6 +76,9 @@ graph TD
     C --> C3
     C --> C4
     C --> C5
+
+    H --> B
+    H <-.-> I
 
     C1 --> D
     C2 --> D
