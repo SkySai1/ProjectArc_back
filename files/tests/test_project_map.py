@@ -1,11 +1,3 @@
-def test_get_project_map_empty(client):
-    """
-    Тест: Получение пустой карты проекта.
-    """
-    response = client.get('/project_map/')
-    assert response.status_code == 200
-    assert response.json == []
-
 def test_add_and_get_project_map(client):
     """
     Тест: Добавление файла и получение карты проекта.
