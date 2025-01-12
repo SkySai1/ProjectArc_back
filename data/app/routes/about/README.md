@@ -72,14 +72,38 @@ app.register_blueprint(about_bp, url_prefix='/about')
 ## Диаграмма взаимодействия
 
 ```mermaid
-graph TD
-    A[Клиент] -->|GET /about/| B[Получение описания]
-    A[Клиент] -->|POST /about/| C[Создание описания]
-    A[Клиент] -->|PUT /about/| D[Обновление описания]
-    B -->|Чтение данных| E[Файловая система]
+graph LR
+    %% Определение стилей для различных типов узлов с улучшенной цветовой палитрой
+    classDef clientStyle fill:#2c3e50, stroke:#1a252f, color:#ffffff, stroke-width:2px;
+    classDef operationStyle fill:#8e44ad, stroke:#6c3483, color:#ffffff, stroke-width:2px;
+    classDef systemStyle fill:#16a085, stroke:#117a65, color:#ffffff, stroke-width:2px;
+
+    %% Узлы диаграммы
+    A[Клиент]:::clientStyle
+
+    subgraph Операции ПО
+        B[Получение описания]:::operationStyle
+        C[Создание описания]:::operationStyle
+        D[Обновление описания]:::operationStyle
+    end
+
+    subgraph Службы ОС
+        E[Файловая система]:::systemStyle
+    end
+
+    %% Связи между узлами
+    A -->|GET /about/| B
+    A -->|POST /about/| C
+    A -->|PUT /about/| D
+
+    B -->|Чтение данных| E
     C -->|Запись данных| E
     D -->|Изменение данных| E
+
     E -->|Ответ клиенту| A
+
+
+
 ```
 
 ---
