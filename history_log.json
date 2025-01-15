@@ -461,5 +461,15 @@
             "tests/test_history_logging.py",
             "tests/test_history_auth.py"
         ]
+    },
+    {
+        "timestamp": 1736944723,
+        "description": "\u0422\u0435\u0441\u0442\u044b \u0438\u0437 \u0444\u0430\u0439\u043b\u0430 tests/test_project_map.py \u0440\u0430\u0437\u0434\u0435\u043b\u0435\u043d\u044b \u043d\u0430 \u0447\u0435\u0442\u044b\u0440\u0435 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u0445 \u0444\u0430\u0439\u043b\u0430: test_project_map_basic.py, test_project_map_errors.py, test_project_map_sync.py \u0438 test_project_map_auth.py.",
+        "affected_files": [
+            "tests/test_project_map_basic.py",
+            "tests/test_project_map_errors.py",
+            "tests/test_project_map_sync.py",
+            "tests/test_project_map_auth.py"
+        ]
     }
 ]
