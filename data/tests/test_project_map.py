@@ -168,3 +168,33 @@ def test_projectmap_api_require(non_headers_client):
     # Выполняем запрос к эндпоинту синхронизации
     response = client.post('/project_map/sync', json=payload)
     assert response.status_code == 401
+
+def test_sync_file_already_in_db(client, app):
+    """
+    Тест: синхронизация файла, который уже существует в базе данных.
+    """
+    # Создаём файл на диске
+    client.post("/files/create", json={
+        "path": "existing_file.txt",
+        "content": "Existing file content"
+    })
+
+    # Синхронизируем файл в базу данных
+    client.post("/project_map/sync", json=[{
+        "path": "existing_file.txt",
+        "description": "This is a test file"
+    }])
+
+    # Пытаемся повторно синхронизировать тот же файл
+    response = client.post("/project_map/sync", json=[{
+        "path": "existing_file.txt",
+        "description": "This is a test file"
+    }])
+
+    assert response.status_code == 200
+    response_data = response.json
+
+    # Проверяем, что файл указан в "already_in_db"
+    assert "existing_file.txt" in response_data["details"]["already_in_db"]
+    assert len(response_data["details"]["synchronized"]) == 0
+    assert len(response_data["details"]["not_found"]) == 0
