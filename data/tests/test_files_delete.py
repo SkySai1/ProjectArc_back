@@ -13,7 +13,7 @@ def test_delete_file(client):
     })
 
     # Удаление файла
-    response = client.delete(DELETE_URL, json={"path": "test.txt"})
+    response = client.post(DELETE_URL, json={"path": "test.txt"})
     assert response.status_code == 200
     assert response.json["message"] == "File 'test.txt' deleted successfully."
 
@@ -21,7 +21,7 @@ def test_delete_file_nonexistent(client):
     """
     Тест: удаление несуществующего файла.
     """
-    response = client.delete(DELETE_URL, json={"path": "nonexistent.txt"})
+    response = client.post(DELETE_URL, json={"path": "nonexistent.txt"})
     assert response.status_code == 404
     assert response.json["error"] == "Path 'nonexistent.txt' does not exist."
 
@@ -47,7 +47,7 @@ def test_delete_file_not_in_db(client, app):
             db.session.commit()
 
     # Попытка удалить файл через API
-    response = client.delete(DELETE_URL, json={"path": file_path})
+    response = client.post(DELETE_URL, json={"path": file_path})
 
     assert response.status_code == 207
     response_data = response.json
@@ -66,7 +66,7 @@ def test_delete_directory_success(client):
     client.post(CREATE_URL, json={"path": "test_dir/sub_dir/file3.txt", "content": "File 3 content"})
 
     # Удаление директории
-    response = client.delete(DELETE_URL, json={"path": "test_dir"})
+    response = client.post(DELETE_URL, json={"path": "test_dir"})
     assert response.status_code == 200
     assert "test_dir" in response.json["message"]
     assert "associated records deleted successfully" in response.json["message"]
@@ -85,6 +85,6 @@ def test_delete_directory_nonexistent(client):
     """
     Тест: попытка удалить несуществующую директорию.
     """
-    response = client.delete(DELETE_URL, json={"path": "nonexistent_dir"})
+    response = client.post(DELETE_URL, json={"path": "nonexistent_dir"})
     assert response.status_code == 404
     assert response.json["error"] == "Path 'nonexistent_dir' does not exist."

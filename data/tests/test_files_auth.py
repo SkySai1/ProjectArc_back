@@ -26,5 +26,5 @@ def test_files_api_require(non_headers_client):
     assert response.status_code == 401
 
     # Удаление файла
-    response = client.delete(DELETE_URL, json={"path": "test.txt"})
+    response = client.post(DELETE_URL, json={"path": "test.txt"})
     assert response.status_code == 401
