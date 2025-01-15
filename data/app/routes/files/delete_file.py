@@ -15,6 +15,8 @@ def delete_file():
 
     if not path:
         return jsonify({"error": "'path' is required."}), 400
+    
+    path = path.rstrip("/")
 
     full_path = os.path.join(BASE_DIR, path)
 
