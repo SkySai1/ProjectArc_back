@@ -441,5 +441,16 @@
             "tests/test_about_update.py",
             "tests/test_about_auth.py"
         ]
+    },
+    {
+        "timestamp": 1736942944,
+        "description": "\u0422\u0435\u0441\u0442\u044b \u0438\u0437 \u0444\u0430\u0439\u043b\u0430 tests/test_files.py \u0440\u0430\u0437\u0434\u0435\u043b\u0435\u043d\u044b \u043d\u0430 \u043f\u044f\u0442\u044c \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u0445 \u0444\u0430\u0439\u043b\u043e\u0432: test_files_read.py, test_files_create.py, test_files_delete.py, test_files_update.py, test_files_auth.py \u0434\u043b\u044f \u0443\u043b\u0443\u0447\u0448\u0435\u043d\u0438\u044f \u0441\u0442\u0440\u0443\u043a\u0442\u0443\u0440\u044b.",
+        "affected_files": [
+            "tests/test_files_read.py",
+            "tests/test_files_create.py",
+            "tests/test_files_delete.py",
+            "tests/test_files_update.py",
+            "tests/test_files_auth.py"
+        ]
     }
 ]
