@@ -19,7 +19,7 @@ class TestConfig(Config):
         self.SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(temp_test_dir, 'test.db')}"
         self.BASE_DIR = temp_test_dir
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def temp_test_dir():
     """
     Создание временной директории для тестов.
@@ -28,7 +28,7 @@ def temp_test_dir():
         os.environ["PROJECT_DIR"] = tmp_dir
         yield tmp_dir
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def app(temp_test_dir):
     """
     Фикстура для тестового клиента Flask.
