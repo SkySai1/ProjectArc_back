@@ -4,7 +4,7 @@ def test_add_and_get_project_map(client):
     """
     # Создаём файл через маршрут /files/create
     response = client.post('/files/create', json={
-        'filename': 'map_test.txt',
+        'path': 'map_test.txt',
         'content': 'Content for map test',
         'description': 'Test file for map'
     })
@@ -29,7 +29,7 @@ def test_delete_from_project_map(client):
     """
     # Создаём файл через маршрут /files/create
     response = client.post('/files/create', json={
-        'filename': 'delete_map_test.txt',
+        'path': 'delete_map_test.txt',
         'content': 'Content for delete test',
         'description': 'File to delete'
     })
@@ -56,7 +56,7 @@ def test_update_project_map(client):
     """
     # Создаём файл через маршрут /files/create
     response = client.post('/files/create', json={
-        'filename': 'update_map_test.txt',
+        'path': 'update_map_test.txt',
         'content': 'Content for update test',
         'description': 'Initial description'
     })

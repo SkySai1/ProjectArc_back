@@ -9,15 +9,15 @@ def read_file():
     """
     BASE_DIR = current_app.config["BASE_DIR"]
 
-    filename = request.args.get("filename")
+    path = request.args.get("path")
 
-    if not filename:
-        return jsonify({"error": "Filename is required."}), 400
+    if not path:
+        return jsonify({"error": "path is required."}), 400
 
-    file_path = os.path.join(BASE_DIR, filename)
+    file_path = os.path.join(BASE_DIR, path)
 
     if not os.path.exists(file_path):
-        return jsonify({"error": f"File '{filename}' does not exist."}), 404
+        return jsonify({"error": f"File '{path}' does not exist."}), 404
 
     try:
         with open(file_path, "r") as f:
@@ -26,7 +26,7 @@ def read_file():
         return jsonify({"error": f"Failed to read file: {str(e)}"}), 500
 
     return jsonify({
-        "filename": filename,
+        "path": path,
         "content": content,
         "size": os.path.getsize(file_path),
         "last_modified": os.path.getmtime(file_path)

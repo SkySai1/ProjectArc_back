@@ -10,17 +10,17 @@ def create_file():
     BASE_DIR = current_app.config["BASE_DIR"]
 
     data = request.json
-    filename = data.get("filename")
+    path = data.get("path")
     content = data.get("content", "")
     description = data.get("description", "")
 
-    if not filename:
-        return jsonify({"error": "Filename is required."}), 400
+    if not path:
+        return jsonify({"error": "path is required."}), 400
 
-    file_path = os.path.join(BASE_DIR, filename)
+    file_path = os.path.join(BASE_DIR, path)
 
     if os.path.exists(file_path):
-        return jsonify({"error": f"File '{filename}' already exists."}), 400
+        return jsonify({"error": f"File '{path}' already exists."}), 400
 
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
@@ -32,11 +32,11 @@ def create_file():
 
     # Добавляем запись в карту проекта
     add_project_file(
-        path=filename,
+        path=path,
         type="file",
         description=description or "No description provided",
         size=file_size,
         last_modified=last_modified
     )
 
-    return jsonify({"message": f"File '{filename}' created successfully."}), 201
+    return jsonify({"message": f"File '{path}' created successfully."}), 201
