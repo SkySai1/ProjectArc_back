@@ -64,15 +64,16 @@ def test_delete_file(client):
     Тест: удаление существующего файла.
     """
     # Создание файла для теста
-    client.post(CREATE_URL, json={
-        "filename": "test.txt",
-        "content": "Hello, World!"
+    response = client.post(CREATE_URL, json={
+        "path": "test.txt",
+        "content": "Hello, World!",
+        "description": "Test file"
     })
 
     # Удаление файла
     response = client.delete(DELETE_URL, json={"path": "test.txt"})
     assert response.status_code == 200
-    assert response.json["message"] == "File 'test.txt' deleted from project database."
+    assert response.json["message"] == "File 'test.txt' deleted successfully."
 
 def test_delete_file_nonexistent(client):
     """
@@ -260,6 +261,36 @@ def test_delete_empty_directory(client):
 
     # Удаление директории
     response = client.delete(DELETE_URL, json={"path": "empty_dir"})
-    assert response.status_code == 200
+    assert response.status_code == 207
     assert "empty_dir" in response.json["message"]
-    assert "associated records deleted successfully" in response.json["message"]
+    assert "Directory 'empty_dir' deleted, but no records found in database." in response.json["message"]
+
+def test_delete_file_not_in_db(client, app):
+    """
+    Тест: Удаление файла, который отсутствует в базе данных, но существует физически.
+    """
+    # Создаём физический файл без добавления в БД
+    file_path = "test_not_in_db_file.txt"
+    client.post(CREATE_URL, json={
+        "path": file_path,
+        "content": "This file exists only physically."
+    })
+    
+    # Удаляем запись о файле из базы данных
+    from app import db
+    with app.app_context():
+        from app.models import ProjectFile
+        file_record = ProjectFile.query.filter_by(path=file_path).first()
+        if file_record:
+            db.session.delete(file_record)
+            db.session.commit()
+
+    # Попытка удалить файл через API
+    response = client.delete(DELETE_URL, json={"path": file_path})
+    
+    assert response.status_code == 207
+    response_data = response.json
+    
+    # Проверяем, что файл удалён физически, но был отмечен как отсутствующий в БД
+    assert response_data["message"] == f"File '{file_path}' deleted, but not found in database."
+    assert response_data["status"] == "not_in_db"
