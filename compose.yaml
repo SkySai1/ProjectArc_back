@@ -4,12 +4,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: gpt_storage
+    container_name: gpts
     ports:
       - "5001:5000"
     volumes:
       - ./example_project:/app/project
     environment:
+      - API_HEADER=Authorization
       - FLASK_ENV=development
       - API_KEY=key
       - PROJECT_DIR=project
+    user: "1000:1000"

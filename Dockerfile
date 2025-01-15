@@ -1,18 +1,14 @@
 # Используем базовый образ Python
 FROM python:3.10-slim
 
+COPY data/ data/
+
 # Устанавливаем рабочую директорию
-WORKDIR /app
+WORKDIR /data
 
-# Копируем файлы в контейнер
-COPY requirements.txt requirements.txt
-COPY app.py app.py
-
-# Создаём папку для файлов
-RUN mkdir files
 
 # Устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Указываем команду запуска
-CMD ["python", "app.py"]
+CMD ["python", "run.py"]
