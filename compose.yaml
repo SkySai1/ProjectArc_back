@@ -8,10 +8,10 @@ services:
     ports:
       - "5001:5000"
     volumes:
-      - ./example_project:/app/project
+      - ./example_project:/data/project_data
     environment:
       - API_HEADER=Authorization
       - FLASK_ENV=development
       - API_KEY=key
-      - PROJECT_DIR=project
-    user: "1000:1000"
+      - PROJECT_DIR=project_data
+    #user: "1000:1000"
