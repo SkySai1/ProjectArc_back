@@ -23,12 +23,12 @@ app = Flask(__name__)
 # Параметры приложения
 BASE_DIR = os.getenv("PROJECT_DIR", "project_data")  # Директория проекта, можно задать через переменную окружения
 ABS_DIR = os.path.abspath(BASE_DIR)  # Преобразуем в абсолютный путь
-PROJECT_FOLDER = os.path.join(BASE_DIR, "files")    # Папка для файлов
+PROJECT_FOLDER = os.path.join(BASE_DIR, "data")    # Папка для файлов
 PROJECT_MAP_DB = os.path.join(ABS_DIR, "project_map.db")  # Карта проекта
 API_KEY = os.getenv("API_KEY", "default_secret_api_key")  # API-ключ из переменной окружения
 
 # Относительный путь для работы с файлами через API
-RELATIVE_FILE_PATH = os.path.join("files")  # Относительный путь от корня папки с файлами проекта
+RELATIVE_FILE_PATH = os.path.join("data")  # Относительный путь от корня папки с файлами проекта
 
 
 if not os.path.exists(BASE_DIR):
