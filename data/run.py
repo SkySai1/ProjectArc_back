@@ -1,6 +1,7 @@
 import os
 from app import create_app
 from config import Config, DevelopmentConfig, ProductionConfig
+from flask import current_app
 
 # Определяем конфигурацию на основе окружения
 config_class = {
