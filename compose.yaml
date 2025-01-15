@@ -12,6 +12,7 @@ services:
     environment:
       - API_HEADER=Authorization
       - FLASK_ENV=development
-      - API_KEY=key
+      - API_KEY=Bearer key
       - PROJECT_DIR=project_data
-    #user: "1000:1000"
+      - HOST_UID=1000 #Изменить на UID основной ОС
+      - HOST_GID=1000 #Изменить на GID основной ОС
