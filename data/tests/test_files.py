@@ -80,7 +80,7 @@ def test_delete_file_nonexistent(client):
     """
     response = client.delete(DELETE_URL, json={"path": "nonexistent.txt"})
     assert response.status_code == 404
-    assert response.json["error"] == "File 'nonexistent.txt' does not exist."
+    assert response.json["error"] == "Path 'nonexistent.txt' does not exist."
 
 def test_update_file_content_success(client):
     """
@@ -209,5 +209,57 @@ def test_files_api_require(non_headers_client):
     response = client.delete(DELETE_URL, json={"path": "test.txt"})
     assert response.status_code == 401
 
+def test_delete_directory_success(client, app):
+    """
+    Тест: успешное рекурсивное удаление директории и всех её файлов.
+    """
+    # Создание файловой структуры
+    client.post(CREATE_URL, json={"path": "test_dir/file1.txt", "content": "File 1 content"})
+    client.post(CREATE_URL, json={"path": "test_dir/file2.txt", "content": "File 2 content"})
+    client.post(CREATE_URL, json={"path": "test_dir/sub_dir/file3.txt", "content": "File 3 content"})
 
-    
+    # Удаление директории
+    response = client.delete(DELETE_URL, json={"path": "test_dir"})
+    assert response.status_code == 200
+    assert "test_dir" in response.json["message"]
+    assert "associated records deleted successfully" in response.json["message"]
+
+    # Проверка отсутствия файлов
+    response = client.get(READ_URL, query_string={"path": "test_dir/file1.txt"})
+    assert response.status_code == 404
+
+    response = client.get(READ_URL, query_string={"path": "test_dir/file2.txt"})
+    assert response.status_code == 404
+
+    response = client.get(READ_URL, query_string={"path": "test_dir/sub_dir/file3.txt"})
+    assert response.status_code == 404
+
+    # Проверка отсутствия записей в базе данных\
+    from app.models import ProjectFile
+    with app.app_context():
+        files = ProjectFile.query.filter(ProjectFile.path.like("test_dir/%")).all()
+        assert len(files) == 0, f"Unexpected records in database: {files}"
+
+def test_delete_directory_nonexistent(client):
+    """
+    Тест: попытка удалить несуществующую директорию.
+    """
+    response = client.delete(DELETE_URL, json={"path": "nonexistent_dir"})
+    assert response.status_code == 404
+    assert response.json["error"] == "Path 'nonexistent_dir' does not exist."
+
+
+def test_delete_empty_directory(client):
+    """
+    Тест: успешное удаление пустой директории.
+    """
+    # Создание файла с тестовой директорией
+    client.post(CREATE_URL, json={"path": "empty_dir/.keep", "content": ""})
+    #Удаление файла и перевод директории в статус пустой
+    client.delete(DELETE_URL, json={"path": "empty_dir/.keep"})
+
+    # Удаление директории
+    response = client.delete(DELETE_URL, json={"path": "empty_dir"})
+    assert response.status_code == 200
+    assert "empty_dir" in response.json["message"]
+    assert "associated records deleted successfully" in response.json["message"]

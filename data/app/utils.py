@@ -43,6 +43,20 @@ def delete_project_file(path):
         return True
     return False
 
+def delete_files_from_project(directory_path):
+    """
+    Удаление всех записей о файлах из указанной директории и её подпапок.
+    """
+    files = ProjectFile.query.filter(ProjectFile.path.like(f"{directory_path}/%"))
+    deleted_count = 0
+
+    for file in files:
+        db.session.delete(file)
+        deleted_count += 1
+
+    db.session.commit()
+    return deleted_count
+
 def update_project_file(path, description=None, size=None, last_modified=None):
     """
     Обновление записи о файле в карте проекта.
