@@ -1,13 +1,14 @@
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.exceptions import BadRequest
 import os
-from app.utils import add_project_file
+from app.utils import add_project_file, require_api_key
 from datetime import datetime
 
 # Blueprint
 project_map_bp = Blueprint('project_map', __name__)
 
 @project_map_bp.route('/sync', methods=['POST'])
+@require_api_key
 def sync_project_files():
     """
     Синхронизация файлов из массива JSON с картой проекта.

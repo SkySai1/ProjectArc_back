@@ -1,7 +1,8 @@
 from flask import request, jsonify, current_app
 import os
-from app.utils import update_project_file
+from app.utils import update_project_file, require_api_key
 
+@require_api_key
 def update_map():
     """
     Обновление описания файла в проекте.

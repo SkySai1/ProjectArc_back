@@ -135,3 +135,36 @@ def test_sync_project_files(client, temp_test_dir):
     assert file1_entry is not None
     assert file1_entry["description"] == "Test file 1"
     assert file1_entry["size"] == os.path.getsize(file1_path)
+
+
+def test_projectmap_api_require(non_headers_client):
+    """
+    Тест на срабатывание проверки API ключа
+    """
+    client = non_headers_client
+
+    # Проверяем карту проекта
+    response = client.get('/project_map/')
+    assert response.status_code == 401
+
+    # Обновляем описание файла через маршрут /project_map
+    response = client.put('/project_map/', json={
+        'path': 'update_map_test.txt',
+        'description': 'Updated description'
+    })
+    assert response.status_code == 401
+
+    # Удаляем файл через маршрут /project_map
+    response = client.post('/project_map/', json={
+        'path': 'delete_map_test.txt'
+    })
+    assert response.status_code == 401
+
+    # Формируем запрос
+    payload = [
+        {"path": "file1.txt", "description": "Test file 1"},
+    ]
+
+    # Выполняем запрос к эндпоинту синхронизации
+    response = client.post('/project_map/sync', json=payload)
+    assert response.status_code == 401

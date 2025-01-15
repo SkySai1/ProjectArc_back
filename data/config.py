@@ -6,6 +6,8 @@ class Config:
     BASE_DIR = BASE_DIR
     SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.abspath(os.path.join(BASE_DIR, 'project_map.db'))}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    API_KEY = os.getenv("API_KEY", "default_secret_api_key")  # API-ключ из переменной окружения
+    API_HEADER = os.getenv("API_KEY", "Authorization") 
 
 class DevelopmentConfig(Config):
     """

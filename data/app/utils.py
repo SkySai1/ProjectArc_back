@@ -1,9 +1,22 @@
 import os
 import json
 import time
-from flask import current_app
+from flask import request, jsonify, current_app
+from functools import wraps
 from app import db
 from app.models import ProjectFile
+
+def require_api_key(f):
+    """Декоратор для проверки API-ключа."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        with current_app.app_context():
+            api_key = request.headers.get(current_app.config['API_HEADER'])
+            if api_key != current_app.config['API_KEY']:
+                return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 def add_project_file(path, type, description, size, last_modified):
     """

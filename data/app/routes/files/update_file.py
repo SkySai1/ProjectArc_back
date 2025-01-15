@@ -1,7 +1,8 @@
 from flask import request, jsonify, current_app
+from app.utils import update_project_file, require_api_key
 import os
-from app.utils import update_project_file
 
+@require_api_key
 def update_file():
     """
     Обновление информации о файле в проекте.

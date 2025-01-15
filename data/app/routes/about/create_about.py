@@ -1,8 +1,10 @@
 from flask import request, jsonify, current_app
+from app.utils import require_api_key
 import os
 import json
 import time
 
+@require_api_key
 def create_about():
     """
     Создание описания проекта.

@@ -1,5 +1,7 @@
 from flask import Response, request
+from app.utils import require_api_key
 
+@require_api_key
 def privacy_policy():
     """
     Политика конфиденциальности на разных языках.

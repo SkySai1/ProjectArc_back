@@ -11,6 +11,8 @@ class TestConfig(Config):
     """
     TESTING = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    API_KEY = os.getenv("API_KEY", "key")  # API-ключ из переменной окружения
+    API_HEADER = os.getenv("API_KEY", "Authorization") 
 
     def __init__(self, temp_test_dir):
         super().__init__()
@@ -50,6 +52,41 @@ def app(temp_test_dir):
 @pytest.fixture(scope="module")
 def client(app):
     """
+    Фикстура для тестового клиента Flask с автоматическим добавлением API-заголовка.
+    """
+    client = app.test_client()
+
+    class AuthenticatedClient:
+        def __init__(self, client):
+            self.client = client
+
+        def get(self, *args, **kwargs):
+            headers = kwargs.pop('headers', {})
+            headers['Authorization'] = TestConfig.API_KEY
+            return self.client.get(*args, headers=headers, **kwargs)
+
+        def post(self, *args, **kwargs):
+            headers = kwargs.pop('headers', {})
+            headers['Authorization'] = TestConfig.API_KEY
+            return self.client.post(*args, headers=headers, **kwargs)
+
+        def put(self, *args, **kwargs):
+            headers = kwargs.pop('headers', {})
+            headers['Authorization'] = TestConfig.API_KEY
+            return self.client.put(*args, headers=headers, **kwargs)
+
+        def delete(self, *args, **kwargs):
+            headers = kwargs.pop('headers', {})
+            headers['Authorization'] = TestConfig.API_KEY
+            return self.client.delete(*args, headers=headers, **kwargs)
+
+    return AuthenticatedClient(client)
+
+
+@pytest.fixture(scope="module")
+def non_headers_client(app):
+    """
     Фикстура для тестового клиента Flask.
     """
+
     return app.test_client()

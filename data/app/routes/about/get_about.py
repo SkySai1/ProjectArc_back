@@ -1,7 +1,9 @@
 from flask import jsonify, current_app
+from app.utils import require_api_key
 import os
 import json
 
+@require_api_key
 def get_about():
     """
     Получение описания проекта.

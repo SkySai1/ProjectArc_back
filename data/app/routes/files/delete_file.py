@@ -1,7 +1,8 @@
 from flask import request, jsonify, current_app
+from app.utils import delete_project_file, require_api_key
 import os
-from app.utils import delete_project_file
 
+@require_api_key
 def delete_file():
     """
     Удаление файла из проекта.

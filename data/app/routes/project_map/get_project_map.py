@@ -1,7 +1,8 @@
 from flask import jsonify
-from app.utils import get_list_project_files
+from app.utils import get_list_project_files, require_api_key
 from datetime import datetime
 
+@require_api_key
 def get_project_map():
     """
     Получить карту проекта из базы данных.

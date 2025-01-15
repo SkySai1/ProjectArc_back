@@ -74,3 +74,23 @@ def test_empty_history_file_with_content(client, temp_test_dir):
     response = client.get('/history/')
     assert response.status_code == 200
     assert response.json == []
+
+
+def test_history_api_require(non_headers_client):
+    """
+    Тест на срабатывание проверки API ключа
+    """
+    client = non_headers_client
+
+    # Проверка файла истории
+    response = client.get('/history/')
+    assert response.status_code == 401
+
+    # Логируем изменение
+    log_data = {
+        "description": "Test log entry",
+        "affected_files": ["test_file.txt"]
+    }
+    response = client.post('/history/', json=log_data)
+
+    assert response.status_code == 401

@@ -1,7 +1,8 @@
 from flask import request, jsonify, current_app
+from app.utils import require_api_key, add_project_file
 import os
-from app.utils import add_project_file
 
+@require_api_key
 def create_file():
     """
     Создание нового файла в проекте.

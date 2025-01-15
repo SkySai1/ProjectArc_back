@@ -45,3 +45,13 @@ def test_privacy_policy_invalid_language(client):
     response = client.get('/privacy/?lang=invalid')
     assert response.status_code == 200
     assert "Privacy Policy" in response.data.decode('utf-8')
+
+
+def test_privacy_api_require(non_headers_client):
+    """
+    Тест на срабатывание проверки API ключа
+    """
+    client = non_headers_client
+
+    response = client.get('/privacy/')
+    assert response.status_code == 401
