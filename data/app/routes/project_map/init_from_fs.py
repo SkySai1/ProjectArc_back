@@ -12,9 +12,14 @@ def sync_project_files():
     """
     try:
         # Получение данных из запроса
-        files_data = request.json
+        request_data = request.json
+        if not isinstance(request_data, dict) or 'files' not in request_data:
+            raise BadRequest("Expected a JSON object with a 'files' key containing an array of file data.")
+        
+        files_data = request_data['files']  # Извлекаем массив файлов из ключа 'files'
+        
         if not isinstance(files_data, list):
-            raise BadRequest("Expected a JSON array of file data.")
+            raise BadRequest("The 'files' key must contain a JSON array of file data.")
 
         results = {
             "synchronized": [],

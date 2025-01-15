@@ -11,10 +11,12 @@ def test_sync_project_files(client, temp_test_dir):
         f.write("Test content for file1")
 
     # Формируем запрос
-    payload = [
-        {"path": "file1.txt", "description": "Test file 1"},
-        {"path": "file2.txt", "description": "Test file 2"},  # Этот файл не будет создан
-    ]
+    payload = {
+        "files": [
+            {"path": "file1.txt", "description": "Test file 1"},
+            {"path": "file2.txt", "description": "Test file 2"},  # Этот файл не будет создан
+        ]
+    }
 
     # Выполняем запрос к эндпоинту синхронизации
     response = client.post('/project_map/sync', json=payload)
@@ -54,11 +56,16 @@ def test_sync_file_already_in_db(client, app):
         "description": "This is a test file"
     }])
 
+    
+
+    payload = {
+        "files": [
+            {"path": "existing_file.txt", "description": "This is a test file"},
+        ]
+    }
+
     # Пытаемся повторно синхронизировать тот же файл
-    response = client.post("/project_map/sync", json=[{
-        "path": "existing_file.txt",
-        "description": "This is a test file"
-    }])
+    response = client.post("/project_map/sync", json=payload)
 
     assert response.status_code == 200
     response_data = response.json
