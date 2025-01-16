@@ -19,6 +19,7 @@
 │   │   │   ├── delete_file.py   # Удаление файлов
 │   │   │   ├── __init__.py      # Инициализация маршрутов files
 │   │   │   ├── read_file.py     # Чтение содержимого файлов
+│   │   │   ├── tree_structure.py # Генерация структуры файлов и папок (новый маршрут /files/tree)
 │   │   │   ├── README.md        # Документация маршрутов files
 │   │   │   └── update_file.py   # Обновление файлов
 │   │   ├── history         # Маршруты для работы с историей изменений
@@ -52,6 +53,7 @@
 │   ├── test_files_delete.py# Тесты удаления файлов
 │   ├── test_files_read.py  # Тесты чтения файлов
 │   ├── test_files_update.py# Тесты обновления файлов
+│   ├── test_files_tree.py  # Тесты маршрута генерации структуры файлов (новый маршрут /files/tree)
 │   ├── test_history_auth.py# Тесты аутентификации маршрутов history
 │   ├── test_history_file.py# Тесты файлов в истории изменений
 │   ├── test_history_logging.py # Тесты логирования изменений
