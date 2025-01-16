@@ -22,9 +22,5 @@ fi
 # Изменяем владельца директории /data
 chown -R appuser:appgroup /data
 
-# Проверяем права доступа
-echo "Права на /data:"
-ls -ld /data
-
 # Переключаемся на нового пользователя и выполняем команду
 exec gosu appuser "$@"
