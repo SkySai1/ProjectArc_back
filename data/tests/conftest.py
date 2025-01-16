@@ -57,36 +57,36 @@ def client(app):
     client = app.test_client()
 
     class AuthenticatedClient:
-        def __init__(self, client):
+        def __init__(self, client, app):
             self.client = client
+            self.application = app
+            self.api_key = app.config["API_KEY"]
 
         def get(self, *args, **kwargs):
             headers = kwargs.pop('headers', {})
-            headers['Authorization'] = TestConfig.API_KEY
+            headers['Authorization'] = self.api_key
             return self.client.get(*args, headers=headers, **kwargs)
 
         def post(self, *args, **kwargs):
             headers = kwargs.pop('headers', {})
-            headers['Authorization'] = TestConfig.API_KEY
+            headers['Authorization'] = self.api_key
             return self.client.post(*args, headers=headers, **kwargs)
 
         def put(self, *args, **kwargs):
             headers = kwargs.pop('headers', {})
-            headers['Authorization'] = TestConfig.API_KEY
+            headers['Authorization'] = self.api_key
             return self.client.put(*args, headers=headers, **kwargs)
 
         def delete(self, *args, **kwargs):
             headers = kwargs.pop('headers', {})
-            headers['Authorization'] = TestConfig.API_KEY
+            headers['Authorization'] = self.api_key
             return self.client.delete(*args, headers=headers, **kwargs)
 
-    return AuthenticatedClient(client)
-
+    return AuthenticatedClient(client, app)
 
 @pytest.fixture(scope="module")
 def non_headers_client(app):
     """
     Фикстура для тестового клиента Flask.
     """
-
     return app.test_client()
