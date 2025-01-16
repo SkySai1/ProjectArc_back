@@ -2,12 +2,16 @@ from flask import request, jsonify, current_app
 from app.utils import require_api_key
 import os
 
-def generate_tree(directory, depth=None):
+def generate_tree(directory, depth=None, base_dir=None):
     """
     Генерация структуры дерева для указанной директории.
+    Параметры:
+    - directory: Абсолютный путь к директории.
+    - depth: Максимальная глубина обхода.
+    - base_dir: Базовая директория для преобразования путей в относительные.
     """
     tree = {
-        "directory": directory,
+        "directory": os.path.relpath(directory, base_dir) if base_dir else directory,
         "subdirectories": [],
         "files": []
     }
@@ -20,12 +24,12 @@ def generate_tree(directory, depth=None):
 
             # Добавляем только директории
             tree["subdirectories"].extend(
-                [os.path.join(root, d) for d in dirs if os.path.isdir(os.path.join(root, d))]
+                [os.path.relpath(os.path.join(root, d), base_dir) for d in dirs]
             )
 
             # Добавляем только файлы
             tree["files"].extend(
-                [os.path.join(root, f) for f in files if os.path.isfile(os.path.join(root, f))]
+                [os.path.relpath(os.path.join(root, f), base_dir) for f in files]
             )
     except Exception as e:
         return {"error": str(e)}
@@ -36,6 +40,7 @@ def generate_tree(directory, depth=None):
 def tree_structure():
     """
     Маршрут для получения структуры файлов и папок.
+    Возвращает пути относительно BASE_DIR.
     """
     BASE_DIR = current_app.config["BASE_DIR"]
     relative_path = request.args.get("path", "")
@@ -51,7 +56,7 @@ def tree_structure():
     depth = request.args.get("depth")
     depth = int(depth) if depth is not None else None
 
-    tree = generate_tree(full_path, depth=depth)
+    tree = generate_tree(full_path, depth=depth, base_dir=BASE_DIR)
 
     if "error" in tree:
         return jsonify(tree), 500
