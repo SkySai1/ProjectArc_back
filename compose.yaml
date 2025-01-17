@@ -4,12 +4,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: gpt_storage
+    container_name: gpts
     ports:
-      - "5001:5000"
+      - "5002:5000"
     volumes:
-      - ./example_project:/app/project
+      - ./example_project:/data/project_data
     environment:
+      - API_HEADER=Authorization
       - FLASK_ENV=development
-      - API_KEY=key
-      - PROJECT_DIR=project
+      - API_KEY=Bearer key
+      - PROJECT_DIR=project_data
+      - HOST_UID=1000 #Изменить на UID основной ОС
+      - HOST_GID=1000 #Изменить на GID основной ОС

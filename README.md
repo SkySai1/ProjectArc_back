@@ -14,13 +14,11 @@ This project provides a RESTful API for managing files, directories, and a proje
    - [Using Docker](#using-docker)
    - [Using Docker Compose](#using-docker-compose)
 4. [API Endpoints](#api-endpoints)
-   - [Create File](#1-create-file)
-   - [Delete File or Directory (Update Project Map)](#2-delete-file-or-directory-update-project-map)
-   - [Add or Update Entry in Project Map](#3-add-or-update-entry-in-project-map)
-   - [Retrieve File Content](#4-retrieve-file-content)
-   - [Retrieve Project Map](#5-retrieve-project-map)
-   - [Update Project Map](#6-update-data-in-project-map)
-   - [Delete data in Project map](#7-delete-data-from-project-map)
+   - [About API Documentation](app/routes/about/README.md)
+   - [Files API Documentation](app/routes/files/README.md)
+   - [History API Documentation](app/routes/history/README.md)
+   - [Privacy API Documentation](app/routes/privacy/README.md)
+   - [Project Map API Documentation](app/routes/project_map/README.md)
 5. [Docker Setup](#docker-setup)
    - [Dockerfile](#dockerfile)
    - [Docker Compose](#docker-compose)
@@ -100,132 +98,20 @@ This project provides a RESTful API for managing files, directories, and a proje
 
 ## API Endpoints
 
-### 1. **Create File**
-- **POST** `/create`
-- **Description**: Creates a new file or directory and updates the project map.
-- **Headers**: `Authorization: <API_KEY>`
-- **Body**:
-  ```json
-  {
-      "filename": "folder/subfolder/file.txt",
-      "content": "File content here",
-      "description": "Optional file description"
-  }
-  ```
-- **Response**:
-  - `201`: File created successfully.
-  - `400`: Invalid request.
-  - `401`: Unauthorized.
+### [About API Documentation](data/app/routes/about/README.md)
+- Provides information about managing project descriptions.
 
-### 2. **Delete File or Directory (Update Project Map)**
-- **POST** `/project_map`
-- **Description**: Deletes a specific file or folder from the project map.
-- **Headers**: `Authorization: <API_KEY>`
-- **Body**:
-  ```json
-  {
-      "path": "folder/subfolder/file.txt"
-  }
-  ```
-- **Response**:
-  - `200`: File or folder deleted successfully.
-  - `404`: File or folder not found in the project map.
-  - `500`: Error occurred while processing.
+### [Files API Documentation](data/app/routes/files/README.md)
+- Handles file creation, deletion, and updates.
 
-### 3. **Add or Update Entry in Project Map**
-- **PUT** `/project_map`
-- **Description**: Adds or updates an entry in the project map for a specific file.
-- **Headers**: `Authorization: <API_KEY>`
-- **Body**:
-  ```json
-  {
-      "path": "folder/subfolder/file.txt",
-      "description": "Updated description",
-      "size": 1234,
-      "last_modified": 1698765436
-  }
-  ```
-- **Response**:
-  - `200`: Entry added or updated successfully.
-  - `400`: Invalid request.
-  - `500`: Error occurred while processing.
+### [History API Documentation](data/app/routes/history/README.md)
+- Manages the logging and retrieval of project change history.
 
-### 4. **Retrieve File Content**
-- **GET** `/get_file`
-- **Description**: Retrieves the content of a specific file.
-- **Headers**: `Authorization: <API_KEY>`
-- **Query Parameters**:
-  - `filename`: The path to the file.
-- **Response**:
-  ```json
-  {
-      "filename": "folder/subfolder/file.txt",
-      "content": "File content here"
-  }
-  ```
+### [Privacy API Documentation](data/app/routes/privacy/README.md)
+- Offers multi-language support for privacy policies.
 
-### 5. **Retrieve Project Map**
-- **GET** `/project_map`
-- **Description**: Retrieves the current project map in JSON format.
-- **Headers**: `Authorization: <API_KEY>`
-- **Response**:
-  ```json
-  {
-      "folder/subfolder": {
-          "file.txt": {
-              "description": "File description",
-              "size": 123,
-              "last_modified": 1698765436
-          }
-      }
-  }
-  ```
-
-### 6. **Update data in project map**
-- **Метод**: `PUT`
-- **Описание**: Добавляет или обновляет информацию о конкретном файле в карте проекта.
-- **Заголовки**: 
-  - `Authorization: <API_KEY>`
-- **Тело запроса**:
-  ```json
-  {
-      "path": "folder/subfolder/file.txt",
-      "description": "Description of the file",
-      "size": 1234,
-      "last_modified": 1698765436
-  }
-  ```
-- **Ответы**:
-  - `200`: Запись добавлена или обновлена успешно.
-    ```json
-    {
-        "message": "File 'folder/subfolder/file.txt' successfully added or updated in the project map."
-    }
-    ```
-  - `400`: Некорректный запрос (отсутствуют обязательные ключи или неверный формат данных).
-  - `500`: Ошибка при обработке.
-
-
-### 7. **Delete data from project map**
-- **Метод**: `POST`
-- **Описание**: Удаляет информацию о конкретном файле или папке из карты проекта.
-- **Заголовки**: 
-  - `Authorization: <API_KEY>`
-- **Тело запроса**:
-  ```json
-  {
-      "path": "folder/subfolder/file.txt"
-  }
-  ```
-- **Ответы**:
-  - `200`: Указанный путь успешно удалён из карты проекта.
-    ```json
-    {
-        "message": "Path 'folder/subfolder/file.txt' deleted from project map."
-    }
-    ```
-  - `404`: Указанный путь не найден в карте проекта.
-  - `500`: Ошибка при обработке.
+### [Project Map API Documentation](data/app/routes/project_map/README.md)
+- Facilitates managing and syncing the project map with the filesystem.
 
 ---
 
