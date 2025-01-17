@@ -4,10 +4,10 @@ info:
   description: API для работы с проектом (создание, обновление, удаление данных).
   version: 1.0.0
 servers:
-  - url: https://gpts.volutega.com
+  - url: https://gpts.volutega.com/v2
     description: Основной сервер API
 paths:
-  /v2/about/:
+  /about/:
     get:
       operationId: getProjectDescription
       summary: Получение описания проекта.
@@ -77,7 +77,7 @@ paths:
           description: Отсутствует обязательный параметр.
         "404":
           description: Файл описания отсутствует.
-  /v2/files/create:
+  /files/create:
     post:
       operationId: createFile
       summary: Создание нового файла.
@@ -113,7 +113,7 @@ paths:
                     description: Сообщение об успешном создании файла.
         "400":
           description: Ошибки в параметрах или файл уже существует.
-  /v2/files/delete:
+  /files/delete:
     post:
       operationId: deleteObject
       summary: Удаление файла или директории.
@@ -156,7 +156,7 @@ paths:
                     description: Статус ошибки (например, "not_in_db").
         "404":
           description: Указанный путь не найден.
-  /v2/files/update:
+  /files/update:
     put:
       operationId: updateFile
       summary: Обновление содержимого и/или описания файла.
@@ -194,7 +194,7 @@ paths:
           description: Ошибки в параметрах.
         "404":
           description: Файл не найден.
-  /v2/files/read:
+  /files/read:
     get:
       operationId: readFile
       summary: Чтение содержимого файла.
@@ -232,7 +232,7 @@ paths:
         "404":
           description: Файл не найден.
 
-  /v2/history/:
+  /history/:
     get:
       operationId: getHistory
       summary: Получение истории изменений
@@ -288,7 +288,7 @@ paths:
           description: Отсутствует обязательный параметр `description`.
 
 
-  /v2/project_map/:
+  /project_map/:
     get:
       operationId: getProjectMap
       summary: Получение карты проекта
@@ -373,7 +373,7 @@ paths:
           description: Файл не найден в карте проекта.
         '500':
           description: Ошибка при обновлении данных.
-  /v2/project_map/sync:
+  /project_map/sync:
     post:
       operationId: syncProjectFiles
       summary: Синхронизация файлов с картой проекта
@@ -430,7 +430,7 @@ paths:
           description: Ни один файл не найден.
         '400':
           description: Некорректный формат запроса.
-  /v2/files/tree:
+  /files/tree:
     get:
       operationId: getFileTree
       summary: Получение структуры файлов и папок.
@@ -449,6 +449,26 @@ paths:
           schema:
             type: integer
             default: 3
+        - name: excluded_dirs
+          in: query
+          description: Список директорий для исключения из результата.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+        - name: excluded_patterns
+          in: query
+          description: Паттерны для исключения директорий (например, "__pycache__").
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
       responses:
         '200':
           description: Возвращает дерево файлов и папок.
