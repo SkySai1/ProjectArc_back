@@ -45,6 +45,8 @@
 2. test_tree_with_valid_path: Проверяет генерацию дерева файлов для указанного пути.
 3. test_tree_invalid_path: Проверяет обработку ошибки для несуществующего пути.
 4. test_tree_with_depth: Проверяет ограничение глубины анализа структуры.
+5. test_tree_with_excluded_dirs: Проверяет исключение указанных директорий из результата.
+6. test_tree_with_excluded_patterns: Проверяет исключение директорий по паттернам, таких как `__pycache__`.
 
 ## test_files_update.py
 
