@@ -69,6 +69,8 @@ app.register_blueprint(files_bp, url_prefix='/files')
 - **Параметры (Query String):**
   - `path` (string, необязательный) – Относительный путь к директории (по умолчанию `BASE_DIR`).
   - `depth` (integer, необязательный) – Глубина обхода дерева (по умолчанию 3).
+  - `excluded_dirs` (list of strings, необязательный) – Список директорий для исключения из результата.
+  - `excluded_patterns` (list of strings, необязательный) – Паттерны для исключения директорий (например, `"__pycache__"`).
 
 - **Коды ответа:**
   - `200 OK` – Возвращает дерево файлов и папок.
@@ -77,7 +79,7 @@ app.register_blueprint(files_bp, url_prefix='/files')
 
 - **Пример запроса:**
 ```
-GET /files/tree?path=subdir&depth=2
+GET /files/tree?path=subdir&depth=2&excluded_patterns=__pycache__
 ```
 
 - **Пример ответа:**
@@ -90,6 +92,53 @@ GET /files/tree?path=subdir&depth=2
 ```
 
 ---
+
+```mermaid
+graph LR
+    %% Определение стилей для различных типов узлов с улучшенной цветовой палитрой
+    classDef clientStyle fill:#2c3e50, stroke:#1a252f, color:#ffffff, stroke-width:2px;
+    classDef operationStyle fill:#2980b9, stroke:#1f618d, color:#ffffff, stroke-width:2px;
+    classDef systemStyle fill:#16a085, stroke:#117a65, color:#ffffff, stroke-width:2px;
+
+    %% Узлы диаграммы
+    A[Клиент]:::clientStyle
+
+    subgraph Операции ПО
+        B[Создание файла]:::operationStyle
+        C[Удаление файла/директории]:::operationStyle
+        D[Обновление файла]:::operationStyle
+        E[Чтение файла]:::operationStyle
+        F[Получение структуры файлов]:::operationStyle
+        I[Формирование ответа]:::operationStyle
+    end
+
+    subgraph Службы ОС
+        G[Файловая система]:::systemStyle
+        H[СУБД]:::systemStyle
+    end
+
+    %% Связи между узлами
+    A -->|POST /files/create| B
+    A -->|POST /files/delete| C
+    A -->|PUT /files/update| D
+    A -->|GET /files/read| E
+    A -->|GET /files/tree| F
+
+    B -->|Создание файла| G
+    C -->|Удаление файла/директории| G
+    D -->|Обновление файла| G
+    E -->|Чтение файла| G
+    F -->|Получение структуры| G
+
+    B -.->|Логирование создания| H
+    C -.->|Логирование удаления| H
+    D -.->|Логирование обновления| H
+
+    %% Новые связи для формирования ответа
+    G -->|Данные операции| I
+    H -->|Данные логирования| I
+    I -->|Ответ клиенту| A
+```
 
 ## Примечания
 - Для управления файлами используется файловая система и СУБД.
